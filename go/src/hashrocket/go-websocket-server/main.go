@@ -25,8 +25,8 @@ func main() {
 	flag.IntVar(&options.port, "port", 3000, "port to listen on")
 	flag.Parse()
 
-	psHandler := NewPubsubHandler()
-	wsServer := websocket.Server{Handler: psHandler.Accept}
+	wsHandler := NewBenchHandler()
+	wsServer := websocket.Server{Handler: wsHandler.Accept}
 	http.Handle("/ws", wsServer)
 
 	listenAt := fmt.Sprintf("%s:%d", options.address, options.port)
