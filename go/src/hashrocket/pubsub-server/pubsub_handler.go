@@ -10,7 +10,7 @@ import (
 
 type pubsubHandler struct {
 	mutex         sync.Mutex
-	channelsConns map[string][]*websocket.Conn
+	channelsConns map[string]map[*websocket.Conn]struct{}
 	connsChannels map[*websocket.Conn][]string
 }
 
@@ -21,7 +21,7 @@ type WsMsg struct {
 
 func NewPubsubHandler() *pubsubHandler {
 	return &pubsubHandler{
-		channelsConns: make(map[string][]*websocket.Conn),
+		channelsConns: make(map[string]map[*websocket.Conn]struct{}),
 		connsChannels: make(map[*websocket.Conn][]string),
 	}
 }
@@ -51,9 +51,11 @@ func (h *pubsubHandler) subscribe(ws *websocket.Conn, channel string) {
 	h.mutex.Lock()
 
 	if conns, ok := h.channelsConns[channel]; ok {
-		h.channelsConns[channel] = append(conns, ws)
+		conns[ws] = struct{}{}
 	} else {
-		h.channelsConns[channel] = []*websocket.Conn{ws}
+		conns = make(map[*websocket.Conn]struct{})
+		conns[ws] = struct{}{}
+		h.channelsConns[channel] = conns
 	}
 
 	if chans, ok := h.connsChannels[ws]; ok {
@@ -69,7 +71,7 @@ func (h *pubsubHandler) sendMessage(ws *websocket.Conn, channel string, message 
 	h.mutex.Lock()
 
 	if conns, ok := h.channelsConns[channel]; ok {
-		for _, c := range conns {
+		for c, _ := range conns {
 			if c != ws {
 				if err := websocket.JSON.Send(c, &WsMsg{Type: "message", Payload: map[string]string{"channel": channel, "message": message}}); err != nil {
 					log.Println("websocket.JSON.Send err:", err)
@@ -83,4 +85,15 @@ func (h *pubsubHandler) sendMessage(ws *websocket.Conn, channel string, message 
 
 func (h *pubsubHandler) cleanup(ws *websocket.Conn) {
 	ws.Close()
+	h.mutex.Lock()
+
+	if channels, ok := h.connsChannels[ws]; ok {
+		for _, c := range channels {
+			delete(h.channelsConns[c], ws)
+		}
+	}
+
+	delete(h.connsChannels, ws)
+
+	h.mutex.Unlock()
 }
