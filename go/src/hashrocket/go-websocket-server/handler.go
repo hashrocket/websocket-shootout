@@ -19,10 +19,9 @@ type WsMsg struct {
 }
 
 type BroadcastResult struct {
-	Type         string      `json:"type"`
-	Payload      interface{} `json:"payload"`
-	SuccessCount int         `json:"successCount"`
-	ErrorCount   int         `json:"errorCount"`
+	Type          string      `json:"type"`
+	Payload       interface{} `json:"payload"`
+	ListenerCount int         `json:"listenerCount"`
 }
 
 func NewBenchHandler() *benchHandler {
@@ -77,10 +76,7 @@ func (h *benchHandler) broadcast(ws *websocket.Conn, payload interface{}) error 
 	for c, _ := range h.conns {
 		if c != ws {
 			if err := websocket.JSON.Send(c, &WsMsg{Type: "broadcast", Payload: payload}); err == nil {
-				result.SuccessCount += 1
-			} else {
-				result.ErrorCount += 1
-				log.Println("websocket.JSON.Send err:", err)
+				result.ListenerCount += 1
 			}
 		}
 	}

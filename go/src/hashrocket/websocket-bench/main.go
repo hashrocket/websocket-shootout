@@ -16,6 +16,7 @@ func main() {
 		clientCount        int
 		echoFrequency      int
 		broadcastFrequency int
+		resetFrequency     int
 		statDuration       time.Duration
 	}
 
@@ -29,6 +30,7 @@ func main() {
 	flag.IntVar(&options.clientCount, "clientcount", 1, "number of concurrent clients")
 	flag.IntVar(&options.echoFrequency, "echofrequency", 0, "number of echoes per second (distributed among all clients)")
 	flag.IntVar(&options.broadcastFrequency, "broadcastfrequency", 0, "number of broadcasts per second (distributed among all clients)")
+	flag.IntVar(&options.resetFrequency, "resetfrequency", 0, "number of clients that disconnect and reconnect per second")
 	flag.DurationVar(&options.statDuration, "statduration", time.Second*15, "how often to aggregate stats")
 	flag.Parse()
 
@@ -40,12 +42,15 @@ func main() {
 		}
 	}
 
-	var echoTickChan, broadcastTickChan <-chan time.Time
+	var echoTickChan, broadcastTickChan, resetTickChan <-chan time.Time
 	if options.echoFrequency > 0 {
 		echoTickChan = time.Tick(time.Duration(int64(time.Second) / int64(options.echoFrequency)))
 	}
 	if options.broadcastFrequency > 0 {
 		broadcastTickChan = time.Tick(time.Duration(int64(time.Second) / int64(options.broadcastFrequency)))
+	}
+	if options.resetFrequency > 0 {
+		resetTickChan = time.Tick(time.Duration(int64(time.Second) / int64(options.resetFrequency)))
 	}
 
 	echoResultChan := make(chan *EchoResult)
@@ -54,7 +59,7 @@ func main() {
 
 	var runningClients int
 	for ; runningClients < options.clientCount; runningClients++ {
-		c, err := NewClient(options.websocketURL, options.websocketOrigin, echoTickChan, broadcastTickChan, echoResultChan, broadcastResultChan, doneChan)
+		c, err := NewClient(options.websocketURL, options.websocketOrigin, echoTickChan, broadcastTickChan, resetTickChan, echoResultChan, broadcastResultChan, doneChan)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -98,10 +103,7 @@ func printStats(echoStat echoStatAggregate, broadcastStat broadcastStatAggregate
 		broadcastMeanRTT := broadcastStat.totalRTT / time.Duration(broadcastStat.count)
 		fmt.Printf("Broadcast RTT: %v min / %v max / %v mean\n", broadcastStat.minRTT, broadcastStat.maxRTT, broadcastMeanRTT)
 
-		broadcastMeanSuccessSends := broadcastStat.totalSuccessSends / broadcastStat.count
-		fmt.Printf("Broadcast Success: %v min / %v max / %v mean\n", broadcastStat.minSuccessSends, broadcastStat.maxSuccessSends, broadcastMeanSuccessSends)
-
-		broadcastMeanErrorSends := broadcastStat.totalErrorSends / broadcastStat.count
-		fmt.Printf("Broadcast Error: %v min / %v max / %v mean\n", broadcastStat.minErrorSends, broadcastStat.maxErrorSends, broadcastMeanErrorSends)
+		broadcastMeanListeners := broadcastStat.totalListeners / broadcastStat.count
+		fmt.Printf("Broadcast Listeners: %v min / %v max / %v mean\n", broadcastStat.minListeners, broadcastStat.maxListeners, broadcastMeanListeners)
 	}
 }

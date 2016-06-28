@@ -10,8 +10,11 @@ import (
 
 type Client struct {
 	conn                *websocket.Conn
+	url                 string
+	origin              string
 	echoTickChan        <-chan time.Time
 	broadcastTickChan   <-chan time.Time
+	resetTickChan       <-chan time.Time
 	rxErrChan           chan error
 	echoResultChan      chan *EchoResult
 	broadcastResultChan chan *BroadcastResult
@@ -25,22 +28,24 @@ type wsMsg struct {
 
 // serverSentMsg includes all fields that can be in server sent message
 type serverSentMsg struct {
-	Type         string      `json:"type"`
-	Payload      interface{} `json:"payload"`
-	SuccessCount int         `json:"successCount"`
-	ErrorCount   int         `json:"errorCount"`
+	Type          string      `json:"type"`
+	Payload       interface{} `json:"payload"`
+	ListenerCount int         `json:"listenerCount"`
 }
 
 func NewClient(
 	url, origin string,
-	echoTickChan, broadcastTickChan <-chan time.Time,
+	echoTickChan, broadcastTickChan, resetTickChan <-chan time.Time,
 	echoResultChan chan *EchoResult,
 	broadcastResultChan chan *BroadcastResult,
 	doneChan chan error,
 ) (*Client, error) {
 	c := &Client{
+		url:                 url,
+		origin:              origin,
 		echoTickChan:        echoTickChan,
 		broadcastTickChan:   broadcastTickChan,
+		resetTickChan:       resetTickChan,
 		rxErrChan:           make(chan error),
 		echoResultChan:      echoResultChan,
 		broadcastResultChan: broadcastResultChan,
@@ -69,6 +74,15 @@ func (c *Client) Run() {
 			if err := websocket.JSON.Send(c.conn, &wsMsg{Type: "broadcast", Payload: t.UnixNano()}); err != nil {
 				panic("websocket.JSON.Send fail")
 			}
+		case <-c.resetTickChan:
+			c.conn.Close()
+			<-c.rxErrChan
+			if c2, err := NewClient(c.url, c.origin, c.echoTickChan, c.broadcastTickChan, c.resetTickChan, c.echoResultChan, c.broadcastResultChan, c.doneChan); err == nil {
+				go c2.Run()
+			} else {
+				c.doneChan <- err
+			}
+			return
 		case err := <-c.rxErrChan:
 			if err == io.EOF {
 				c.doneChan <- nil
@@ -102,8 +116,7 @@ func (c *Client) rx() {
 			if sentUnixNanosecond, ok := msg.Payload.(float64); ok {
 				br := &BroadcastResult{}
 				br.RTT = time.Duration(time.Now().UnixNano() - int64(sentUnixNanosecond))
-				br.SuccessCount = msg.SuccessCount
-				br.ErrorCount = msg.ErrorCount
+				br.ListenerCount = msg.ListenerCount
 				c.broadcastResultChan <- br
 			} else {
 				c.rxErrChan <- fmt.Errorf("received unparsable echo payload: %v", msg.Payload)

@@ -19,13 +19,9 @@ type broadcastStatAggregate struct {
 	minRTT   time.Duration
 	totalRTT time.Duration
 
-	maxSuccessSends   int
-	minSuccessSends   int
-	totalSuccessSends int
-
-	maxErrorSends   int
-	minErrorSends   int
-	totalErrorSends int
+	maxListeners   int
+	minListeners   int
+	totalListeners int
 }
 
 type EchoResult struct {
@@ -33,9 +29,8 @@ type EchoResult struct {
 }
 
 type BroadcastResult struct {
-	RTT          time.Duration // Round-trip time
-	SuccessCount int
-	ErrorCount   int
+	RTT           time.Duration // Round-trip time
+	ListenerCount int
 }
 
 func (agg *echoStatAggregate) add(res *EchoResult) {
@@ -61,19 +56,11 @@ func (agg *broadcastStatAggregate) add(res *BroadcastResult) {
 	}
 	agg.totalRTT += res.RTT
 
-	if agg.minSuccessSends == 0 || res.SuccessCount < agg.minSuccessSends {
-		agg.minSuccessSends = res.SuccessCount
+	if agg.minListeners == 0 || res.ListenerCount < agg.minListeners {
+		agg.minListeners = res.ListenerCount
 	}
-	if res.SuccessCount > agg.maxSuccessSends {
-		agg.maxSuccessSends = res.SuccessCount
+	if res.ListenerCount > agg.maxListeners {
+		agg.maxListeners = res.ListenerCount
 	}
-	agg.totalSuccessSends += res.SuccessCount
-
-	if agg.minErrorSends == 0 || res.ErrorCount < agg.minErrorSends {
-		agg.minErrorSends = res.ErrorCount
-	}
-	if res.ErrorCount > agg.maxErrorSends {
-		agg.maxErrorSends = res.ErrorCount
-	}
-	agg.totalErrorSends += res.ErrorCount
+	agg.totalListeners += res.ListenerCount
 }
