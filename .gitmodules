@@ -1,0 +1,3 @@
+[submodule "go/src/golang.org/x/net"]
+	path = go/src/golang.org/x/net
+	url = https://go.googlesource.com/net
