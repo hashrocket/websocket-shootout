@@ -1,3 +1,9 @@
 [submodule "go/src/golang.org/x/net"]
 	path = go/src/golang.org/x/net
 	url = https://go.googlesource.com/net
+[submodule "go/src/github.com/spf13/cobra"]
+	path = go/src/github.com/spf13/cobra
+	url = https://github.com/spf13/cobra.git
+[submodule "go/src/github.com/spf13/pflag"]
+	path = go/src/github.com/spf13/pflag
+	url = https://github.com/spf13/pflag.git
