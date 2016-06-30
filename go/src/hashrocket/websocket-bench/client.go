@@ -10,19 +10,22 @@ import (
 	"golang.org/x/net/websocket"
 )
 
+const (
+	clientEchoCmd = iota
+	clientBroadcastCmd
+	clientResetCmd
+)
+
 type Client struct {
-	conn                *websocket.Conn
-	config              *websocket.Config
-	laddr               *net.TCPAddr
-	dest                string
-	origin              string
-	echoTickChan        <-chan time.Time
-	broadcastTickChan   <-chan time.Time
-	resetTickChan       <-chan time.Time
-	rxErrChan           chan error
-	echoResultChan      chan *EchoResult
-	broadcastResultChan chan *BroadcastResult
-	doneChan            chan error
+	conn          *websocket.Conn
+	config        *websocket.Config
+	laddr         *net.TCPAddr
+	dest          string
+	origin        string
+	cmdChan       <-chan int
+	rxErrChan     chan error
+	rttResultChan chan time.Duration
+	doneChan      chan error
 }
 
 type wsMsg struct {
@@ -40,22 +43,22 @@ type serverSentMsg struct {
 func NewClient(
 	laddr *net.TCPAddr,
 	dest, origin string,
-	echoTickChan, broadcastTickChan, resetTickChan <-chan time.Time,
-	echoResultChan chan *EchoResult,
-	broadcastResultChan chan *BroadcastResult,
+	cmdChan <-chan int,
+	rttResultChan chan time.Duration,
 	doneChan chan error,
 ) (*Client, error) {
+	if origin == "" {
+		origin = dest
+	}
+
 	c := &Client{
-		laddr:               laddr,
-		dest:                dest,
-		origin:              origin,
-		echoTickChan:        echoTickChan,
-		broadcastTickChan:   broadcastTickChan,
-		resetTickChan:       resetTickChan,
-		rxErrChan:           make(chan error),
-		echoResultChan:      echoResultChan,
-		broadcastResultChan: broadcastResultChan,
-		doneChan:            doneChan,
+		laddr:         laddr,
+		dest:          dest,
+		origin:        origin,
+		cmdChan:       cmdChan,
+		rxErrChan:     make(chan error),
+		rttResultChan: rttResultChan,
+		doneChan:      doneChan,
 	}
 
 	config, err := websocket.NewConfig(dest, origin)
@@ -97,23 +100,28 @@ func (c *Client) Run() {
 
 	for {
 		select {
-		case t := <-c.echoTickChan:
-			if err := websocket.JSON.Send(c.conn, &wsMsg{Type: "echo", Payload: t.UnixNano()}); err != nil {
-				panic("websocket.JSON.Send fail")
+		case cmd := <-c.cmdChan:
+			switch cmd {
+			case clientEchoCmd:
+				if err := websocket.JSON.Send(c.conn, &wsMsg{Type: "echo", Payload: time.Now().UnixNano()}); err != nil {
+					panic("websocket.JSON.Send fail")
+				}
+			case clientBroadcastCmd:
+				if err := websocket.JSON.Send(c.conn, &wsMsg{Type: "broadcast", Payload: time.Now().UnixNano()}); err != nil {
+					panic("websocket.JSON.Send fail")
+				}
+			case clientResetCmd:
+				c.conn.Close()
+				<-c.rxErrChan
+				if c2, err := NewClient(c.laddr, c.dest, c.origin, c.cmdChan, c.rttResultChan, c.doneChan); err == nil {
+					go c2.Run()
+				} else {
+					c.doneChan <- err
+				}
+				return
+			default:
+				panic("unknown cmd")
 			}
-		case t := <-c.broadcastTickChan:
-			if err := websocket.JSON.Send(c.conn, &wsMsg{Type: "broadcast", Payload: t.UnixNano()}); err != nil {
-				panic("websocket.JSON.Send fail")
-			}
-		case <-c.resetTickChan:
-			c.conn.Close()
-			<-c.rxErrChan
-			if c2, err := NewClient(c.laddr, c.dest, c.origin, c.echoTickChan, c.broadcastTickChan, c.resetTickChan, c.echoResultChan, c.broadcastResultChan, c.doneChan); err == nil {
-				go c2.Run()
-			} else {
-				c.doneChan <- err
-			}
-			return
 		case err := <-c.rxErrChan:
 			if err == io.EOF {
 				c.doneChan <- nil
@@ -134,24 +142,14 @@ func (c *Client) rx() {
 		}
 
 		switch msg.Type {
-		case "echo":
+		case "echo", "broadcastResult":
 			if sentUnixNanosecond, ok := msg.Payload.(float64); ok {
-				er := &EchoResult{}
-				er.RTT = time.Duration(time.Now().UnixNano() - int64(sentUnixNanosecond))
-				c.echoResultChan <- er
+				rtt := time.Duration(time.Now().UnixNano() - int64(sentUnixNanosecond))
+				c.rttResultChan <- rtt
 			} else {
-				c.rxErrChan <- fmt.Errorf("received unparsable echo payload: %v", msg.Payload)
+				c.rxErrChan <- fmt.Errorf("received unparsable %s payload: %v", msg.Type, msg.Payload)
 			}
 		case "broadcast":
-		case "broadcastResult":
-			if sentUnixNanosecond, ok := msg.Payload.(float64); ok {
-				br := &BroadcastResult{}
-				br.RTT = time.Duration(time.Now().UnixNano() - int64(sentUnixNanosecond))
-				br.ListenerCount = msg.ListenerCount
-				c.broadcastResultChan <- br
-			} else {
-				c.rxErrChan <- fmt.Errorf("received unparsable echo payload: %v", msg.Payload)
-			}
 		default:
 			c.rxErrChan <- fmt.Errorf("received unknown message type: %v", msg.Type)
 		}

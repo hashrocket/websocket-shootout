@@ -1,66 +1,57 @@
 package main
 
 import (
+	"sort"
 	"time"
 )
 
-type echoStatAggregate struct {
-	count int
-
-	maxRTT   time.Duration
-	minRTT   time.Duration
-	totalRTT time.Duration
+type rttAggregate struct {
+	samples []time.Duration
+	sorted  bool
 }
 
-type broadcastStatAggregate struct {
-	count int
+type byAsc []time.Duration
 
-	maxRTT   time.Duration
-	minRTT   time.Duration
-	totalRTT time.Duration
+func (a byAsc) Len() int           { return len(a) }
+func (a byAsc) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a byAsc) Less(i, j int) bool { return a[i] < a[j] }
 
-	maxListeners   int
-	minListeners   int
-	totalListeners int
+func (agg *rttAggregate) Add(rtt time.Duration) {
+	agg.samples = append(agg.samples, rtt)
+	agg.sorted = false
 }
 
-type EchoResult struct {
-	RTT time.Duration // Round-trip time
+func (agg *rttAggregate) Count() int {
+	return len(agg.samples)
 }
 
-type BroadcastResult struct {
-	RTT           time.Duration // Round-trip time
-	ListenerCount int
+func (agg *rttAggregate) Min() time.Duration {
+	agg.Sort()
+	return agg.samples[0]
 }
 
-func (agg *echoStatAggregate) add(res *EchoResult) {
-	agg.count += 1
-
-	if agg.minRTT == 0 || res.RTT < agg.minRTT {
-		agg.minRTT = res.RTT
-	}
-	if res.RTT > agg.maxRTT {
-		agg.maxRTT = res.RTT
-	}
-	agg.totalRTT += res.RTT
+func (agg *rttAggregate) Max() time.Duration {
+	agg.Sort()
+	return agg.samples[len(agg.samples)-1]
 }
 
-func (agg *broadcastStatAggregate) add(res *BroadcastResult) {
-	agg.count += 1
+func (agg *rttAggregate) Percentile(p int) time.Duration {
+	if p <= 0 {
+		panic("p must be greater than 0")
+	} else if 100 <= p {
+		panic("p must be less 100")
+	}
 
-	if agg.minRTT == 0 || res.RTT < agg.minRTT {
-		agg.minRTT = res.RTT
-	}
-	if res.RTT > agg.maxRTT {
-		agg.maxRTT = res.RTT
-	}
-	agg.totalRTT += res.RTT
+	agg.Sort()
 
-	if agg.minListeners == 0 || res.ListenerCount < agg.minListeners {
-		agg.minListeners = res.ListenerCount
+	rank := p * len(agg.samples) / 100
+	return agg.samples[rank]
+}
+
+func (agg *rttAggregate) Sort() {
+	if agg.sorted {
+		return
 	}
-	if res.ListenerCount > agg.maxListeners {
-		agg.maxListeners = res.ListenerCount
-	}
-	agg.totalListeners += res.ListenerCount
+	sort.Sort(byAsc(agg.samples))
+	agg.sorted = true
 }

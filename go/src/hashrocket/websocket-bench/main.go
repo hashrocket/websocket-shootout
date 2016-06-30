@@ -1,123 +1,143 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"net"
-	"net/url"
 	"os"
-	"strings"
 	"time"
+
+	"github.com/spf13/cobra"
 )
 
+var options struct {
+	websocketURL    string
+	websocketOrigin string
+	concurrent      int
+	sampleSize      int
+	stepSize        int
+	limitPercentile int
+	limitRTT        time.Duration
+	localAddrs      []string
+}
+
 func main() {
-	var options struct {
-		websocketURL       string
-		websocketOrigin    string
-		clientCount        int
-		echoFrequency      int
-		broadcastFrequency int
-		resetFrequency     int
-		statDuration       time.Duration
-		localAddrs         string
+
+	rootCmd := &cobra.Command{Use: "websocket-bench", Short: "websocket benchmark tool"}
+	rootCmd.PersistentFlags().StringVarP(&options.websocketOrigin, "origin", "o", "", "websocket origin")
+	rootCmd.PersistentFlags().StringSliceVarP(&options.localAddrs, "local-addr", "l", []string{}, "local IP address to connect from")
+
+	cmdEcho := &cobra.Command{
+		Use:   "echo URL",
+		Short: "Echo stress test",
+		Long:  "Stress test 1 to 1 performance with an echo test",
+		Run:   Stress,
+	}
+	cmdEcho.Flags().IntVarP(&options.concurrent, "concurrent", "c", 50, "concurrent echo requests")
+	cmdEcho.Flags().IntVarP(&options.sampleSize, "sample-size", "s", 10000, "number of echoes in a sample")
+	cmdEcho.Flags().IntVarP(&options.stepSize, "step-size", "", 5000, "number of clients to increase each step")
+	cmdEcho.Flags().IntVarP(&options.limitPercentile, "limit-percentile", "", 95, "round-trip time percentile to for limit")
+	cmdEcho.Flags().DurationVarP(&options.limitRTT, "limit-rtt", "", time.Millisecond*500, "Max RTT at limit percentile")
+	rootCmd.AddCommand(cmdEcho)
+
+	cmdBroadcast := &cobra.Command{
+		Use:   "broadcast URL",
+		Short: "Broadcast stress test",
+		Long:  "Stress test 1 to many performance with an broadcast test",
+		Run:   Stress,
+	}
+	cmdBroadcast.Flags().IntVarP(&options.concurrent, "concurrent", "c", 4, "concurrent broadcast requests")
+	cmdBroadcast.Flags().IntVarP(&options.sampleSize, "sample-size", "s", 20, "number of broadcasts in a sample")
+	cmdBroadcast.Flags().IntVarP(&options.stepSize, "step-size", "", 5000, "number of clients to increase each step")
+	cmdBroadcast.Flags().IntVarP(&options.limitPercentile, "limit-percentile", "", 95, "round-trip time percentile to for limit")
+	cmdBroadcast.Flags().DurationVarP(&options.limitRTT, "limit-rtt", "", time.Millisecond*500, "Max RTT at limit percentile")
+	rootCmd.AddCommand(cmdBroadcast)
+
+	rootCmd.Execute()
+}
+
+func Stress(cmd *cobra.Command, args []string) {
+	if len(args) != 1 {
+		cmd.Help()
+		os.Exit(1)
 	}
 
-	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "usage:  %s [options]\n", os.Args[0])
-		flag.PrintDefaults()
+	var clientCmd int
+	switch cmd.Name() {
+	case "echo":
+		clientCmd = clientEchoCmd
+	case "broadcast":
+		clientCmd = clientBroadcastCmd
+	default:
+		panic("invalid command name")
 	}
 
-	flag.StringVar(&options.websocketURL, "url", "ws://localhost:3000/ws", "websocket URL")
-	flag.StringVar(&options.websocketOrigin, "origin", "", "websocket origin")
-	flag.IntVar(&options.clientCount, "clientcount", 1, "number of concurrent clients")
-	flag.IntVar(&options.echoFrequency, "echofrequency", 0, "number of echoes per second (distributed among all clients)")
-	flag.IntVar(&options.broadcastFrequency, "broadcastfrequency", 0, "number of broadcasts per second (distributed among all clients)")
-	flag.IntVar(&options.resetFrequency, "resetfrequency", 0, "number of clients that disconnect and reconnect per second")
-	flag.DurationVar(&options.statDuration, "statduration", time.Second*15, "how often to aggregate stats")
-	flag.StringVar(&options.localAddrs, "localaddrs", "", `IP address(es) to connect from (e.g. "192.168.0.10,12.18.0.11")`)
-	flag.Parse()
-
-	if options.websocketOrigin == "" {
-		if wsURL, err := url.Parse(options.websocketURL); err == nil {
-			options.websocketOrigin = "http://" + wsURL.Host
-		} else {
-			log.Fatal(err)
-		}
-	}
-
-	var echoTickChan, broadcastTickChan, resetTickChan <-chan time.Time
-	if options.echoFrequency > 0 {
-		echoTickChan = time.Tick(time.Duration(int64(time.Second) / int64(options.echoFrequency)))
-	}
-	if options.broadcastFrequency > 0 {
-		broadcastTickChan = time.Tick(time.Duration(int64(time.Second) / int64(options.broadcastFrequency)))
-	}
-	if options.resetFrequency > 0 {
-		resetTickChan = time.Tick(time.Duration(int64(time.Second) / int64(options.resetFrequency)))
-	}
-
-	var localAddrs []*net.TCPAddr
-	if options.localAddrs == "" {
-		localAddrs = []*net.TCPAddr{nil}
-	} else {
-		for _, s := range strings.Split(options.localAddrs, ",") {
-			localAddrs = append(localAddrs, &net.TCPAddr{IP: net.ParseIP(s)})
-		}
-	}
-
-	echoResultChan := make(chan *EchoResult)
-	broadcastResultChan := make(chan *BroadcastResult)
+	options.websocketURL = args[0]
+	localAddrs := parseTCPAddrs(options.localAddrs)
+	cmdChan := make(chan int)
+	rttResultChan := make(chan time.Duration)
 	doneChan := make(chan error)
 
-	var runningClients int
-	for ; runningClients < options.clientCount; runningClients++ {
-		laddr := localAddrs[runningClients%len(localAddrs)]
-		c, err := NewClient(laddr, options.websocketURL, options.websocketOrigin, echoTickChan, broadcastTickChan, resetTickChan, echoResultChan, broadcastResultChan, doneChan)
-		if err != nil {
+	clientCount := 0
+	for {
+		if err := startClients(options.stepSize, localAddrs, cmdChan, rttResultChan, doneChan); err != nil {
 			log.Fatal(err)
+		}
+		clientCount += options.stepSize
+
+		inProgress := 0
+		for i := 0; i < options.concurrent; i++ {
+			cmdChan <- clientCmd
+			inProgress += 1
+		}
+
+		var rttAgg rttAggregate
+		for rttAgg.Count() < options.sampleSize {
+			rttAgg.Add(<-rttResultChan)
+			inProgress -= 1
+
+			if rttAgg.Count()+inProgress < options.sampleSize {
+				cmdChan <- clientCmd
+				inProgress += 1
+			}
+		}
+
+		if options.limitRTT < rttAgg.Percentile(options.limitPercentile) {
+			return
+		}
+
+		fmt.Printf("clients: %d\t%dper-rtt: %v\tmin-rtt: %v\tmedian-rtt: %v\tmax-rtt: %v\n",
+			clientCount,
+			options.limitPercentile,
+			rttAgg.Percentile(options.limitPercentile),
+			rttAgg.Min(),
+			rttAgg.Percentile(50),
+			rttAgg.Max())
+	}
+}
+
+func startClients(count int, localAddrs []*net.TCPAddr, cmdChan <-chan int, rttResultChan chan time.Duration, doneChan chan error) error {
+	for i := 0; i < count; i++ {
+		laddr := localAddrs[i%len(localAddrs)]
+		c, err := NewClient(laddr, options.websocketURL, options.websocketOrigin, cmdChan, rttResultChan, doneChan)
+		if err != nil {
+			return err
 		}
 		go c.Run()
 	}
 
-	statTickChan := time.Tick(options.statDuration)
-	var echoStat echoStatAggregate
-	var broadcastStat broadcastStatAggregate
-
-	for runningClients > 0 {
-		select {
-		case t := <-statTickChan:
-			fmt.Println(t)
-			printStats(echoStat, broadcastStat)
-			fmt.Println()
-			echoStat = echoStatAggregate{}
-			broadcastStat = broadcastStatAggregate{}
-		case res := <-echoResultChan:
-			echoStat.add(res)
-		case res := <-broadcastResultChan:
-			broadcastStat.add(res)
-		case err := <-doneChan:
-			runningClients -= 1
-			if err != nil {
-				log.Println("client died unexpectedly:", err)
-			}
-		}
-	}
+	return nil
 }
 
-func printStats(echoStat echoStatAggregate, broadcastStat broadcastStatAggregate) {
-	fmt.Println("Echo Count:", echoStat.count)
-	if echoStat.count > 0 {
-		echoMeanRTT := echoStat.totalRTT / time.Duration(echoStat.count)
-		fmt.Printf("Echo RTT: %v min / %v max / %v mean\n", echoStat.minRTT, echoStat.maxRTT, echoMeanRTT)
+func parseTCPAddrs(stringAddrs []string) []*net.TCPAddr {
+	var tcpAddrs []*net.TCPAddr
+	for _, s := range stringAddrs {
+		tcpAddrs = append(tcpAddrs, &net.TCPAddr{IP: net.ParseIP(s)})
 	}
 
-	fmt.Println("Broadcast Count:", broadcastStat.count)
-	if broadcastStat.count > 0 {
-		broadcastMeanRTT := broadcastStat.totalRTT / time.Duration(broadcastStat.count)
-		fmt.Printf("Broadcast RTT: %v min / %v max / %v mean\n", broadcastStat.minRTT, broadcastStat.maxRTT, broadcastMeanRTT)
-
-		broadcastMeanListeners := broadcastStat.totalListeners / broadcastStat.count
-		fmt.Printf("Broadcast Listeners: %v min / %v max / %v mean\n", broadcastStat.minListeners, broadcastStat.maxListeners, broadcastMeanListeners)
+	if len(tcpAddrs) == 0 {
+		tcpAddrs = []*net.TCPAddr{nil}
 	}
+
+	return tcpAddrs
 }
