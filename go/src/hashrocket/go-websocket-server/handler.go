@@ -74,10 +74,8 @@ func (h *benchHandler) broadcast(ws *websocket.Conn, payload interface{}) error 
 	h.mutex.Lock()
 
 	for c, _ := range h.conns {
-		if c != ws {
-			if err := websocket.JSON.Send(c, &WsMsg{Type: "broadcast", Payload: payload}); err == nil {
-				result.ListenerCount += 1
-			}
+		if err := websocket.JSON.Send(c, &WsMsg{Type: "broadcast", Payload: payload}); err == nil {
+			result.ListenerCount += 1
 		}
 	}
 
