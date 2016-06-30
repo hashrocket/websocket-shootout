@@ -4,8 +4,10 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -18,6 +20,7 @@ func main() {
 		broadcastFrequency int
 		resetFrequency     int
 		statDuration       time.Duration
+		localAddrs         string
 	}
 
 	flag.Usage = func() {
@@ -32,6 +35,7 @@ func main() {
 	flag.IntVar(&options.broadcastFrequency, "broadcastfrequency", 0, "number of broadcasts per second (distributed among all clients)")
 	flag.IntVar(&options.resetFrequency, "resetfrequency", 0, "number of clients that disconnect and reconnect per second")
 	flag.DurationVar(&options.statDuration, "statduration", time.Second*15, "how often to aggregate stats")
+	flag.StringVar(&options.localAddrs, "localaddrs", "", `IP address(es) to connect from (e.g. "192.168.0.10,12.18.0.11")`)
 	flag.Parse()
 
 	if options.websocketOrigin == "" {
@@ -53,13 +57,23 @@ func main() {
 		resetTickChan = time.Tick(time.Duration(int64(time.Second) / int64(options.resetFrequency)))
 	}
 
+	var localAddrs []*net.TCPAddr
+	if options.localAddrs == "" {
+		localAddrs = []*net.TCPAddr{nil}
+	} else {
+		for _, s := range strings.Split(options.localAddrs, ",") {
+			localAddrs = append(localAddrs, &net.TCPAddr{IP: net.ParseIP(s)})
+		}
+	}
+
 	echoResultChan := make(chan *EchoResult)
 	broadcastResultChan := make(chan *BroadcastResult)
 	doneChan := make(chan error)
 
 	var runningClients int
 	for ; runningClients < options.clientCount; runningClients++ {
-		c, err := NewClient(options.websocketURL, options.websocketOrigin, echoTickChan, broadcastTickChan, resetTickChan, echoResultChan, broadcastResultChan, doneChan)
+		laddr := localAddrs[runningClients%len(localAddrs)]
+		c, err := NewClient(laddr, options.websocketURL, options.websocketOrigin, echoTickChan, broadcastTickChan, resetTickChan, echoResultChan, broadcastResultChan, doneChan)
 		if err != nil {
 			log.Fatal(err)
 		}

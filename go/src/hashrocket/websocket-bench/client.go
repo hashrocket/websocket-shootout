@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"io"
+	"net"
+	"strconv"
 	"time"
 
 	"golang.org/x/net/websocket"
@@ -10,7 +12,9 @@ import (
 
 type Client struct {
 	conn                *websocket.Conn
-	url                 string
+	config              *websocket.Config
+	laddr               *net.TCPAddr
+	dest                string
 	origin              string
 	echoTickChan        <-chan time.Time
 	broadcastTickChan   <-chan time.Time
@@ -34,14 +38,16 @@ type serverSentMsg struct {
 }
 
 func NewClient(
-	url, origin string,
+	laddr *net.TCPAddr,
+	dest, origin string,
 	echoTickChan, broadcastTickChan, resetTickChan <-chan time.Time,
 	echoResultChan chan *EchoResult,
 	broadcastResultChan chan *BroadcastResult,
 	doneChan chan error,
 ) (*Client, error) {
 	c := &Client{
-		url:                 url,
+		laddr:               laddr,
+		dest:                dest,
 		origin:              origin,
 		echoTickChan:        echoTickChan,
 		broadcastTickChan:   broadcastTickChan,
@@ -52,8 +58,33 @@ func NewClient(
 		doneChan:            doneChan,
 	}
 
-	var err error
-	c.conn, err = websocket.Dial(url, "", origin)
+	config, err := websocket.NewConfig(dest, origin)
+	if err != nil {
+		return nil, err
+	}
+
+	host, port, err := net.SplitHostPort(config.Location.Host)
+	if err != nil {
+		return nil, err
+	}
+
+	destIPs, err := net.LookupHost(host)
+	if err != nil {
+		return nil, err
+	}
+
+	nport, err := strconv.ParseUint(port, 10, 16)
+	if err != nil {
+		return nil, err
+	}
+
+	raddr := net.TCPAddr{IP: net.ParseIP(destIPs[0]), Port: int(nport)}
+	tcpConn, err := net.DialTCP("tcp", c.laddr, &raddr)
+	if err != nil {
+		return nil, err
+	}
+
+	c.conn, err = websocket.NewClient(config, tcpConn)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +108,7 @@ func (c *Client) Run() {
 		case <-c.resetTickChan:
 			c.conn.Close()
 			<-c.rxErrChan
-			if c2, err := NewClient(c.url, c.origin, c.echoTickChan, c.broadcastTickChan, c.resetTickChan, c.echoResultChan, c.broadcastResultChan, c.doneChan); err == nil {
+			if c2, err := NewClient(c.laddr, c.dest, c.origin, c.echoTickChan, c.broadcastTickChan, c.resetTickChan, c.echoResultChan, c.broadcastResultChan, c.doneChan); err == nil {
 				go c2.Run()
 			} else {
 				c.doneChan <- err
