@@ -9,7 +9,7 @@ import (
 )
 
 type benchHandler struct {
-	mutex sync.Mutex
+	mutex sync.RWMutex
 	conns map[*websocket.Conn]struct{}
 }
 
@@ -71,7 +71,7 @@ func (h *benchHandler) echo(ws *websocket.Conn, payload interface{}) error {
 func (h *benchHandler) broadcast(ws *websocket.Conn, payload interface{}) error {
 	result := BroadcastResult{Type: "broadcastResult", Payload: payload}
 
-	h.mutex.Lock()
+	h.mutex.RLock()
 
 	for c, _ := range h.conns {
 		if err := websocket.JSON.Send(c, &WsMsg{Type: "broadcast", Payload: payload}); err == nil {
@@ -79,7 +79,7 @@ func (h *benchHandler) broadcast(ws *websocket.Conn, payload interface{}) error 
 		}
 	}
 
-	h.mutex.Unlock()
+	h.mutex.RUnlock()
 
 	return websocket.JSON.Send(ws, &result)
 }
