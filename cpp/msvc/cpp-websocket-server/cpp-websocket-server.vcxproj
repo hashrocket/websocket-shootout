@@ -69,11 +69,11 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Users\dev\dev\vendor\boost_1_61_0;C:\Users\dev\dev\vendor\websocketpp;C:\Users\dev\dev\vendor\tclap-1.2.1\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\dev\dev\vendor\boost_1_61_0;C:\Users\dev\dev\vendor\websocketpp;C:\Users\dev\dev\vendor\tclap-1.2.1\include;C:\Users\dev\dev\websocket-shootout\cpp\vendor\jsoncpp\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\dev\dev\vendor\boost_1_61_0\stage\win32\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>C:\Users\dev\dev\vendor\boost_1_61_0;C:\Users\dev\dev\vendor\websocketpp;C:\Users\dev\dev\vendor\tclap-1.2.1\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\dev\dev\vendor\boost_1_61_0;C:\Users\dev\dev\vendor\websocketpp;C:\Users\dev\dev\vendor\tclap-1.2.1\include;C:\Users\dev\dev\websocket-shootout\cpp\vendor\jsoncpp\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\dev\dev\vendor\boost_1_61_0\stage\win32\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -127,7 +127,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\server.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
+    <ClCompile Include="..\..\vendor\jsoncpp\src\jsoncpp.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\server.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
