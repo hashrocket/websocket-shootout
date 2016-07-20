@@ -78,6 +78,12 @@ void server::broadcast(websocketpp::connection_hdl src_hdl, const Json::Value &s
 	for (auto hdl : conns) {
 		wspp_server.send(hdl, dst_msg_str, websocketpp::frame::opcode::text);
 	}
+
+	Json::Value result_msg;
+	result_msg["type"] = "broadcastResult";
+	result_msg["payload"] = src_msg["payload"];
+	result_msg["listenCount"] = int(conns.size());
+	wspp_server.send(src_hdl, json_to_string(result_msg), websocketpp::frame::opcode::text);
 }
 
 std::string server::json_to_string(Json::Value json) {
