@@ -1,0 +1,2 @@
+class WsDebuggerController < ApplicationController
+end

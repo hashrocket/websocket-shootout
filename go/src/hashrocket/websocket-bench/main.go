@@ -13,6 +13,7 @@ import (
 var options struct {
 	websocketURL    string
 	websocketOrigin string
+	serverType      string
 	concurrent      int
 	sampleSize      int
 	stepSize        int
@@ -26,6 +27,7 @@ func main() {
 	rootCmd := &cobra.Command{Use: "websocket-bench", Short: "websocket benchmark tool"}
 	rootCmd.PersistentFlags().StringVarP(&options.websocketOrigin, "origin", "o", "", "websocket origin")
 	rootCmd.PersistentFlags().StringSliceVarP(&options.localAddrs, "local-addr", "l", []string{}, "local IP address to connect from")
+	rootCmd.PersistentFlags().StringVarP(&options.serverType, "server-type", "", "standard", "server type to connect to (standard, actioncable)")
 
 	cmdEcho := &cobra.Command{
 		Use:   "echo URL",
@@ -80,7 +82,7 @@ func Stress(cmd *cobra.Command, args []string) {
 
 	clientCount := 0
 	for {
-		if err := startClients(options.stepSize, localAddrs, cmdChan, rttResultChan, doneChan); err != nil {
+		if err := startClients(options.serverType, options.stepSize, localAddrs, cmdChan, rttResultChan, doneChan); err != nil {
 			log.Fatal(err)
 		}
 		clientCount += options.stepSize
@@ -116,10 +118,10 @@ func Stress(cmd *cobra.Command, args []string) {
 	}
 }
 
-func startClients(count int, localAddrs []*net.TCPAddr, cmdChan <-chan int, rttResultChan chan time.Duration, doneChan chan error) error {
+func startClients(serverType string, count int, localAddrs []*net.TCPAddr, cmdChan <-chan int, rttResultChan chan time.Duration, doneChan chan error) error {
 	for i := 0; i < count; i++ {
 		laddr := localAddrs[i%len(localAddrs)]
-		c, err := NewClient(laddr, options.websocketURL, options.websocketOrigin, cmdChan, rttResultChan, doneChan)
+		c, err := NewClient(laddr, options.websocketURL, options.websocketOrigin, serverType, cmdChan, rttResultChan, doneChan)
 		if err != nil {
 			return err
 		}

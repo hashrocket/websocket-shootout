@@ -22,10 +22,18 @@ type Client struct {
 	laddr         *net.TCPAddr
 	dest          string
 	origin        string
+	serverType    string
+	serverAdapter ServerAdapter
 	cmdChan       <-chan int
 	rxErrChan     chan error
 	rttResultChan chan time.Duration
 	doneChan      chan error
+}
+
+type ServerAdapter interface {
+	SendEcho(payload interface{}) error
+	SendBroadcast(payload interface{}) error
+	Receive() (*serverSentMsg, error)
 }
 
 type wsMsg struct {
@@ -42,7 +50,7 @@ type serverSentMsg struct {
 
 func NewClient(
 	laddr *net.TCPAddr,
-	dest, origin string,
+	dest, origin, serverType string,
 	cmdChan <-chan int,
 	rttResultChan chan time.Duration,
 	doneChan chan error,
@@ -92,6 +100,20 @@ func NewClient(
 		return nil, err
 	}
 
+	switch serverType {
+	case "standard":
+		c.serverAdapter = &StandardServerAdapter{conn: c.conn}
+	case "actioncable":
+		acsa := &ActionCableServerAdapter{conn: c.conn}
+		err = acsa.Startup()
+		if err != nil {
+			return nil, err
+		}
+		c.serverAdapter = acsa
+	default:
+		return nil, fmt.Errorf("Unknown server type: %v", serverType)
+	}
+
 	return c, nil
 }
 
@@ -103,17 +125,17 @@ func (c *Client) Run() {
 		case cmd := <-c.cmdChan:
 			switch cmd {
 			case clientEchoCmd:
-				if err := websocket.JSON.Send(c.conn, &wsMsg{Type: "echo", Payload: time.Now().UnixNano()}); err != nil {
-					panic("websocket.JSON.Send fail")
+				if err := c.serverAdapter.SendEcho(time.Now().UnixNano()); err != nil {
+					panic("SendEcho fail")
 				}
 			case clientBroadcastCmd:
-				if err := websocket.JSON.Send(c.conn, &wsMsg{Type: "broadcast", Payload: time.Now().UnixNano()}); err != nil {
-					panic("websocket.JSON.Send fail")
+				if err := c.serverAdapter.SendBroadcast(time.Now().UnixNano()); err != nil {
+					panic("SendBroadcast fail")
 				}
 			case clientResetCmd:
 				c.conn.Close()
 				<-c.rxErrChan
-				if c2, err := NewClient(c.laddr, c.dest, c.origin, c.cmdChan, c.rttResultChan, c.doneChan); err == nil {
+				if c2, err := NewClient(c.laddr, c.dest, c.origin, c.serverType, c.cmdChan, c.rttResultChan, c.doneChan); err == nil {
 					go c2.Run()
 				} else {
 					c.doneChan <- err
@@ -123,6 +145,7 @@ func (c *Client) Run() {
 				panic("unknown cmd")
 			}
 		case err := <-c.rxErrChan:
+			panic("need to rxErrChan")
 			if err == io.EOF {
 				c.doneChan <- nil
 			} else {
@@ -135,8 +158,8 @@ func (c *Client) Run() {
 
 func (c *Client) rx() {
 	for {
-		var msg serverSentMsg
-		if err := websocket.JSON.Receive(c.conn, &msg); err != nil {
+		msg, err := c.serverAdapter.Receive()
+		if err != nil {
 			c.rxErrChan <- err
 			return
 		}
