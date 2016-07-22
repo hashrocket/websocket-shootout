@@ -110,6 +110,13 @@ func NewClient(
 			return nil, err
 		}
 		c.serverAdapter = acsa
+	case "phoenix":
+		psa := &PhoenixServerAdapter{conn: c.conn}
+		err = psa.Startup()
+		if err != nil {
+			return nil, err
+		}
+		c.serverAdapter = psa
 	default:
 		return nil, fmt.Errorf("Unknown server type: %v", serverType)
 	}

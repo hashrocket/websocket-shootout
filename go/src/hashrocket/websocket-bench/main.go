@@ -27,7 +27,7 @@ func main() {
 	rootCmd := &cobra.Command{Use: "websocket-bench", Short: "websocket benchmark tool"}
 	rootCmd.PersistentFlags().StringVarP(&options.websocketOrigin, "origin", "o", "", "websocket origin")
 	rootCmd.PersistentFlags().StringSliceVarP(&options.localAddrs, "local-addr", "l", []string{}, "local IP address to connect from")
-	rootCmd.PersistentFlags().StringVarP(&options.serverType, "server-type", "", "standard", "server type to connect to (standard, actioncable)")
+	rootCmd.PersistentFlags().StringVarP(&options.serverType, "server-type", "", "standard", "server type to connect to (standard, actioncable, phoenix)")
 
 	cmdEcho := &cobra.Command{
 		Use:   "echo URL",
