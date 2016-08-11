@@ -1,7 +1,7 @@
 GOPATH=$(CURDIR)/go
 
 .PHONY : all
-all : bin/go-websocket-server bin/websocket-bench
+all : bin/go-websocket-server bin/websocket-bench bin/cpp-websocket-server
 
 bin/go-websocket-server : $(GOPATH)/bin/go-websocket-server
 	cp $< $@
