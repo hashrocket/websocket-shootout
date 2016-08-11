@@ -9,8 +9,7 @@ server::server(boost::asio::ip::tcp::endpoint ep) {
 	using websocketpp::lib::placeholders::_2;
 	using websocketpp::lib::bind;
 
-	wspp_server.set_access_channels(websocketpp::log::alevel::all);
-	wspp_server.clear_access_channels(websocketpp::log::alevel::frame_payload);
+	wspp_server.clear_access_channels(websocketpp::log::alevel::all);
 
 	wspp_server.init_asio();
 
