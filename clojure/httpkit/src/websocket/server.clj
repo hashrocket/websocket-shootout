@@ -15,12 +15,13 @@
   (log/info "channel closed:" status)
   (swap! channels disj channel))
 
-(defn broadcast [_ msg]
+(defn broadcast [ch payload]
   (doseq [channel @channels]
-    (send! channel msg)))
+    (send! channel (json/encode {:type "broadcast" :payload payload})))
+  (send! ch (json/encode {:type "broadcastResult" :payload payload})))
 
-(defn echo [ch msg]
-  (send! ch msg))
+(defn echo [ch payload]
+  (send! ch (json/encode {:type "echo" :payload payload})))
 
 (defn unknown-type-response [ch _]
   (send! ch (json/encode {:type "error" :payload "ERROR: unknown message type"})))
@@ -31,7 +32,7 @@
         "echo" echo
         "broadcast" broadcast
         unknown-type-response)
-      ch msg)))
+      ch (get parsed "payload"))))
 
 (defn ws-handler [request]
   (with-channel request channel
