@@ -82,6 +82,8 @@ bin/websocket-bench broadcast ws://earth.local:3334/ws -c 4 -s 40 -l 192.168.50.
 
 ## Results
 
+These results are from running the server on one machine and the benchmark tool as another. Both machines are 4ghz i7 4790Ks running Ubuntu 16.04. Tests were run multiple times and the best results were recorded.
+
 Rails
 
 ```
@@ -112,31 +114,33 @@ clients: 9000 95per-rtt: 447.848027ms min-rtt: 102.902704ms median-rtt: 337.2275
 Go
 
 ```
-dev@mercury:~/hashrocket/websocket-shootout(master*)% bin/websocket-bench broadcast ws://earth.local:3334/ws -c 4 -s 40 --step-size 1000
-clients: 1000 95per-rtt: 30.664379ms  min-rtt: 4.110893ms median-rtt: 12.54746ms  max-rtt: 39.336076ms
-clients: 2000 95per-rtt: 47.590885ms  min-rtt: 11.113939ms  median-rtt: 24.382629ms max-rtt: 54.2211ms
-clients: 3000 95per-rtt: 82.636353ms  min-rtt: 12.524799ms  median-rtt: 31.991254ms max-rtt: 226.599155ms
-clients: 4000 95per-rtt: 81.307903ms  min-rtt: 17.583606ms  median-rtt: 42.489867ms max-rtt: 81.975154ms
-clients: 5000 95per-rtt: 100.968036ms min-rtt: 22.71692ms median-rtt: 54.093886ms max-rtt: 108.113387ms
-clients: 6000 95per-rtt: 116.41069ms  min-rtt: 35.118443ms  median-rtt: 55.726031ms max-rtt: 119.307117ms
-clients: 7000 95per-rtt: 163.662436ms min-rtt: 29.564001ms  median-rtt: 69.352988ms max-rtt: 209.318417ms
-clients: 8000 95per-rtt: 172.772002ms min-rtt: 36.801466ms  median-rtt: 73.036089ms max-rtt: 202.148513ms
-clients: 9000 95per-rtt: 177.556373ms min-rtt: 40.144784ms  median-rtt: 94.339109ms max-rtt: 210.881458ms
-clients: 10000  95per-rtt: 212.419433ms min-rtt: 42.887532ms  median-rtt: 85.739085ms max-rtt: 241.083681ms
-clients: 11000  95per-rtt: 223.181956ms min-rtt: 55.731169ms  median-rtt: 116.603661ms  max-rtt: 282.554934ms
-clients: 12000  95per-rtt: 262.936091ms min-rtt: 50.924064ms  median-rtt: 117.314908ms  max-rtt: 267.849001ms
-clients: 13000  95per-rtt: 282.22892ms  min-rtt: 52.278393ms  median-rtt: 139.050347ms  max-rtt: 361.743452ms
-clients: 14000  95per-rtt: 283.528781ms min-rtt: 61.220161ms  median-rtt: 154.119477ms  max-rtt: 301.909987ms
-clients: 15000  95per-rtt: 308.708679ms min-rtt: 76.657154ms  median-rtt: 145.64143ms max-rtt: 314.737429ms
-clients: 16000  95per-rtt: 357.877893ms min-rtt: 69.86712ms median-rtt: 154.62281ms max-rtt: 368.976486ms
-clients: 17000  95per-rtt: 326.247077ms min-rtt: 69.702684ms  median-rtt: 177.271375ms  max-rtt: 344.713392ms
-clients: 18000  95per-rtt: 359.091894ms min-rtt: 78.80026ms median-rtt: 199.437404ms  max-rtt: 366.581344ms
-clients: 19000  95per-rtt: 467.71395ms  min-rtt: 86.986842ms  median-rtt: 184.039978ms  max-rtt: 479.705353ms
-clients: 20000  95per-rtt: 347.278097ms min-rtt: 87.937885ms  median-rtt: 189.543723ms  max-rtt: 502.16699ms
-clients: 21000  95per-rtt: 408.31974ms  min-rtt: 87.804292ms  median-rtt: 200.883407ms  max-rtt: 519.165509ms
-clients: 22000  95per-rtt: 381.067744ms min-rtt: 138.056942ms median-rtt: 210.187499ms  max-rtt: 450.48821ms
-clients: 23000  95per-rtt: 476.026066ms min-rtt: 95.045688ms  median-rtt: 217.007338ms  max-rtt: 484.188221ms
-clients: 24000  95per-rtt: 435.110799ms min-rtt: 101.119899ms median-rtt: 226.36324ms max-rtt: 563.035748ms
+dev@mercury:~/hashrocket/websocket-shootout(master)% bin/websocket-bench broadcast ws://earth.local:3334/ws -c 4 -s 40 --step-size 1000 -l 192.168.50.5 -l 192.168.50.246 -l 192.168.50.247 -l 192.168.50.247 -l 192.168.50.248 -l 192.168.50.249 -l 192.168.50.250 -l 192.168.50.251 -l 192.168.50.252
+clients: 1000 95per-rtt: 24.577204ms  min-rtt: 4.091507ms median-rtt: 12.782198ms max-rtt: 42.415756ms
+clients: 2000 95per-rtt: 44.704718ms  min-rtt: 10.320552ms  median-rtt: 22.128146ms max-rtt: 47.594475ms
+clients: 3000 95per-rtt: 66.196982ms  min-rtt: 12.963635ms  median-rtt: 34.579619ms max-rtt: 224.629748ms
+clients: 4000 95per-rtt: 85.473984ms  min-rtt: 21.074557ms  median-rtt: 44.874809ms max-rtt: 101.500364ms
+clients: 5000 95per-rtt: 98.792457ms  min-rtt: 24.583176ms  median-rtt: 51.237504ms max-rtt: 110.540583ms
+clients: 6000 95per-rtt: 126.279156ms min-rtt: 27.16688ms median-rtt: 55.343828ms max-rtt: 185.79115ms
+clients: 7000 95per-rtt: 137.955835ms min-rtt: 35.997018ms  median-rtt: 75.129469ms max-rtt: 159.308823ms
+clients: 8000 95per-rtt: 159.672335ms min-rtt: 35.359538ms  median-rtt: 77.004178ms max-rtt: 172.739154ms
+clients: 9000 95per-rtt: 219.310456ms min-rtt: 44.112143ms  median-rtt: 88.533779ms max-rtt: 245.292876ms
+clients: 10000  95per-rtt: 200.434121ms min-rtt: 50.51915ms median-rtt: 101.639121ms  max-rtt: 247.71032ms
+clients: 11000  95per-rtt: 206.444166ms min-rtt: 51.686545ms  median-rtt: 105.974535ms  max-rtt: 267.141568ms
+clients: 12000  95per-rtt: 260.71756ms  min-rtt: 58.101275ms  median-rtt: 129.614697ms  max-rtt: 273.193258ms
+clients: 13000  95per-rtt: 271.170357ms min-rtt: 51.389128ms  median-rtt: 135.344987ms  max-rtt: 319.67284ms
+clients: 14000  95per-rtt: 465.530962ms min-rtt: 57.210809ms  median-rtt: 135.030609ms  max-rtt: 491.143ms
+clients: 15000  95per-rtt: 340.887024ms min-rtt: 66.902937ms  median-rtt: 148.662568ms  max-rtt: 363.154677ms
+clients: 16000  95per-rtt: 308.908847ms min-rtt: 72.073278ms  median-rtt: 161.76622ms max-rtt: 334.469443ms
+clients: 17000  95per-rtt: 370.748573ms min-rtt: 79.032122ms  median-rtt: 186.017799ms  max-rtt: 396.473655ms
+clients: 18000  95per-rtt: 326.510518ms min-rtt: 86.3994ms  median-rtt: 178.812358ms  max-rtt: 392.012241ms
+clients: 19000  95per-rtt: 395.73633ms  min-rtt: 79.526544ms  median-rtt: 179.709451ms  max-rtt: 417.974979ms
+clients: 20000  95per-rtt: 434.018193ms min-rtt: 85.338797ms  median-rtt: 189.017916ms  max-rtt: 435.916021ms
+clients: 21000  95per-rtt: 465.659769ms min-rtt: 109.001589ms median-rtt: 216.353628ms  max-rtt: 492.108389ms
+clients: 22000  95per-rtt: 463.333205ms min-rtt: 94.216702ms  median-rtt: 210.397052ms  max-rtt: 471.447606ms
+clients: 23000  95per-rtt: 439.975716ms min-rtt: 97.438912ms  median-rtt: 237.085804ms  max-rtt: 509.949147ms
+clients: 24000  95per-rtt: 435.028728ms min-rtt: 154.197944ms median-rtt: 241.178006ms  max-rtt: 444.462412ms
+clients: 25000  95per-rtt: 482.795612ms min-rtt: 107.152358ms median-rtt: 236.115307ms  max-rtt: 591.822568ms
+clients: 26000  95per-rtt: 444.560714ms min-rtt: 116.548815ms median-rtt: 245.43298ms max-rtt: 449.502996ms
 ```
 
 Go GOMAXPROCS=1
@@ -190,6 +194,38 @@ clients: 26000  95per-rtt: 408.390687ms min-rtt: 103.991165ms median-rtt: 228.21
 clients: 27000  95per-rtt: 462.905037ms min-rtt: 122.087508ms median-rtt: 236.354512ms  max-rtt: 552.807707ms
 ```
 
+Elixir / Phoenix
+
+```
+dev@mercury:~/hashrocket/websocket-shootout(master)% bin/websocket-bench broadcast --server-type phoenix -c 4 -s 40 --step-size 1000 -l 192.168.50.5 -l 192.168.50.246 -l 192.168.50.247 -l 192.168.50.247 -l 192.168.50.248 -l 192.168.50.249 -l 192.168.50.250 -l 192.168.50.251 -l 192.168.50.252 ws://earth.local:4000/socket/websocket
+clients: 1000 95per-rtt: 34.752448ms  min-rtt: 4.230879ms median-rtt: 11.014644ms max-rtt: 44.012471ms
+clients: 2000 95per-rtt: 44.390532ms  min-rtt: 8.559931ms median-rtt: 23.099905ms max-rtt: 45.617566ms
+clients: 3000 95per-rtt: 64.840853ms  min-rtt: 18.032724ms  median-rtt: 34.09886ms  max-rtt: 229.298322ms
+clients: 4000 95per-rtt: 91.574577ms  min-rtt: 21.187067ms  median-rtt: 44.187483ms max-rtt: 112.013294ms
+clients: 5000 95per-rtt: 202.724569ms min-rtt: 23.558677ms  median-rtt: 57.261323ms max-rtt: 230.207218ms
+clients: 6000 95per-rtt: 120.558877ms min-rtt: 24.392554ms  median-rtt: 63.637343ms max-rtt: 123.597299ms
+clients: 7000 95per-rtt: 128.122742ms min-rtt: 30.235136ms  median-rtt: 76.944281ms max-rtt: 131.761039ms
+clients: 8000 95per-rtt: 206.466607ms min-rtt: 33.266766ms  median-rtt: 89.660295ms max-rtt: 215.976673ms
+clients: 9000 95per-rtt: 159.782194ms min-rtt: 59.988584ms  median-rtt: 97.131684ms max-rtt: 160.993978ms
+clients: 10000  95per-rtt: 182.435934ms min-rtt: 37.316316ms  median-rtt: 115.470112ms  max-rtt: 262.650196ms
+clients: 11000  95per-rtt: 318.021955ms min-rtt: 58.426305ms  median-rtt: 122.063904ms  max-rtt: 327.304214ms
+clients: 12000  95per-rtt: 215.336706ms min-rtt: 74.740085ms  median-rtt: 141.830783ms  max-rtt: 249.346293ms
+clients: 13000  95per-rtt: 324.07202ms  min-rtt: 60.955297ms  median-rtt: 141.253741ms  max-rtt: 326.220278ms
+clients: 14000  95per-rtt: 313.495446ms min-rtt: 68.052912ms  median-rtt: 157.188547ms  max-rtt: 326.799056ms
+clients: 15000  95per-rtt: 263.686611ms min-rtt: 101.873994ms median-rtt: 171.879154ms  max-rtt: 291.983965ms
+clients: 16000  95per-rtt: 336.697394ms min-rtt: 73.777169ms  median-rtt: 201.190146ms  max-rtt: 488.429197ms
+clients: 17000  95per-rtt: 358.373203ms min-rtt: 78.233562ms  median-rtt: 190.05611ms max-rtt: 541.543546ms
+clients: 18000  95per-rtt: 333.99741ms  min-rtt: 73.940687ms  median-rtt: 213.257192ms  max-rtt: 351.386405ms
+clients: 19000  95per-rtt: 468.706693ms min-rtt: 71.66733ms median-rtt: 215.66554ms max-rtt: 477.565136ms
+clients: 20000  95per-rtt: 365.298961ms min-rtt: 131.797097ms median-rtt: 219.539695ms  max-rtt: 465.667041ms
+clients: 21000  95per-rtt: 418.639549ms min-rtt: 74.855777ms  median-rtt: 254.465326ms  max-rtt: 541.566808ms
+clients: 22000  95per-rtt: 412.041654ms min-rtt: 111.095531ms median-rtt: 251.861027ms  max-rtt: 429.882772ms
+clients: 23000  95per-rtt: 397.498533ms min-rtt: 153.165965ms median-rtt: 264.671607ms  max-rtt: 418.540737ms
+clients: 24000  95per-rtt: 475.072114ms min-rtt: 88.942641ms  median-rtt: 289.662693ms  max-rtt: 482.624173ms
+clients: 25000  95per-rtt: 470.695838ms min-rtt: 76.527763ms  median-rtt: 281.647172ms  max-rtt: 524.262378ms
+clients: 26000  95per-rtt: 450.70621ms  min-rtt: 135.185676ms median-rtt: 298.69296ms max-rtt: 472.417507ms
+```
+
 ### Memory Usage
 
 Approximate memory usage as eyeballed in htop.
@@ -198,3 +234,4 @@ Approximate memory usage as eyeballed in htop.
 * C++       ~30MB
 * Clojure ~1500MB
 * Rails    ~150MB
+* Elixir  ~1900MB
