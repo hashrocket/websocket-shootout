@@ -35,14 +35,6 @@ func (acsa *ActionCableServerAdapter) Startup() error {
 		return err
 	}
 
-	confirmSubMsg, err := acsa.receiveIgnoringPing()
-	if err != nil {
-		return err
-	}
-	if confirmSubMsg.Type != "confirm_subscription" || confirmSubMsg.Identifier != `{"channel":"BenchmarkChannel"}` {
-		return fmt.Errorf("expected confirm_subscription msg, got %v", confirmSubMsg)
-	}
-
 	return nil
 }
 
@@ -90,7 +82,8 @@ func (acsa *ActionCableServerAdapter) receiveIgnoringPing() (*acsaMsg, error) {
 		if err != nil {
 			return nil, err
 		}
-		if msg.Type == "ping" {
+		// fmt.Printf("acsa %p msg: %#v\n", acsa, msg)
+		if msg.Type == "ping" || msg.Type == "confirm_subscription" {
 			continue
 		}
 
