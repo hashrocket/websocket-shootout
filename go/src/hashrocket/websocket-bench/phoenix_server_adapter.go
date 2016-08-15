@@ -65,7 +65,13 @@ func (psa *PhoenixServerAdapter) Receive() (*serverSentMsg, error) {
 		return nil, fmt.Errorf("unexpected msg, got %v", msg)
 	}
 
-	response := msg.Payload["response"].(map[string]interface{})
+	var payload map[string]interface{}
 
-	return &serverSentMsg{Type: response["type"].(string), Payload: response["body"]}, nil
+	if response, ok := msg.Payload["response"].(map[string]interface{}); ok {
+		payload = response
+	} else {
+		payload = msg.Payload
+	}
+
+	return &serverSentMsg{Type: payload["type"].(string), Payload: payload["body"]}, nil
 }

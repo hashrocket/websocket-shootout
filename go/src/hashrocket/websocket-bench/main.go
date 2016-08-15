@@ -95,8 +95,14 @@ func Stress(cmd *cobra.Command, args []string) {
 
 		var rttAgg rttAggregate
 		for rttAgg.Count() < options.sampleSize {
-			rttAgg.Add(<-rttResultChan)
-			inProgress -= 1
+			select {
+			case result := <-rttResultChan:
+				rttAgg.Add(result)
+				inProgress -= 1
+			case err := <-doneChan:
+				fmt.Println("doneChan err:", err)
+				clientCount--
+			}
 
 			if rttAgg.Count()+inProgress < options.sampleSize {
 				cmdChan <- clientCmd

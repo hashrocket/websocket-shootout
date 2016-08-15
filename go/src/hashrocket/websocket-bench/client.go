@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"net"
 	"strconv"
 	"time"
@@ -149,15 +148,11 @@ func (c *Client) Run() {
 				}
 				return
 			default:
+				fmt.Println("cmd:", cmd)
 				panic("unknown cmd")
 			}
 		case err := <-c.rxErrChan:
-			panic("need to rxErrChan")
-			if err == io.EOF {
-				c.doneChan <- nil
-			} else {
-				c.doneChan <- err
-			}
+			c.doneChan <- err
 			return
 		}
 	}
