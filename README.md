@@ -115,32 +115,33 @@ Go
 
 ```
 dev@mercury:~/hashrocket/websocket-shootout(master)% bin/websocket-bench broadcast ws://earth.local:3334/ws -c 4 -s 40 --step-size 1000 -l 192.168.50.5 -l 192.168.50.246 -l 192.168.50.247 -l 192.168.50.247 -l 192.168.50.248 -l 192.168.50.249 -l 192.168.50.250 -l 192.168.50.251 -l 192.168.50.252
-clients: 1000 95per-rtt: 24.577204ms  min-rtt: 4.091507ms median-rtt: 12.782198ms max-rtt: 42.415756ms
-clients: 2000 95per-rtt: 44.704718ms  min-rtt: 10.320552ms  median-rtt: 22.128146ms max-rtt: 47.594475ms
-clients: 3000 95per-rtt: 66.196982ms  min-rtt: 12.963635ms  median-rtt: 34.579619ms max-rtt: 224.629748ms
-clients: 4000 95per-rtt: 85.473984ms  min-rtt: 21.074557ms  median-rtt: 44.874809ms max-rtt: 101.500364ms
-clients: 5000 95per-rtt: 98.792457ms  min-rtt: 24.583176ms  median-rtt: 51.237504ms max-rtt: 110.540583ms
-clients: 6000 95per-rtt: 126.279156ms min-rtt: 27.16688ms median-rtt: 55.343828ms max-rtt: 185.79115ms
-clients: 7000 95per-rtt: 137.955835ms min-rtt: 35.997018ms  median-rtt: 75.129469ms max-rtt: 159.308823ms
-clients: 8000 95per-rtt: 159.672335ms min-rtt: 35.359538ms  median-rtt: 77.004178ms max-rtt: 172.739154ms
-clients: 9000 95per-rtt: 219.310456ms min-rtt: 44.112143ms  median-rtt: 88.533779ms max-rtt: 245.292876ms
-clients: 10000  95per-rtt: 200.434121ms min-rtt: 50.51915ms median-rtt: 101.639121ms  max-rtt: 247.71032ms
-clients: 11000  95per-rtt: 206.444166ms min-rtt: 51.686545ms  median-rtt: 105.974535ms  max-rtt: 267.141568ms
-clients: 12000  95per-rtt: 260.71756ms  min-rtt: 58.101275ms  median-rtt: 129.614697ms  max-rtt: 273.193258ms
-clients: 13000  95per-rtt: 271.170357ms min-rtt: 51.389128ms  median-rtt: 135.344987ms  max-rtt: 319.67284ms
-clients: 14000  95per-rtt: 465.530962ms min-rtt: 57.210809ms  median-rtt: 135.030609ms  max-rtt: 491.143ms
-clients: 15000  95per-rtt: 340.887024ms min-rtt: 66.902937ms  median-rtt: 148.662568ms  max-rtt: 363.154677ms
-clients: 16000  95per-rtt: 308.908847ms min-rtt: 72.073278ms  median-rtt: 161.76622ms max-rtt: 334.469443ms
-clients: 17000  95per-rtt: 370.748573ms min-rtt: 79.032122ms  median-rtt: 186.017799ms  max-rtt: 396.473655ms
-clients: 18000  95per-rtt: 326.510518ms min-rtt: 86.3994ms  median-rtt: 178.812358ms  max-rtt: 392.012241ms
-clients: 19000  95per-rtt: 395.73633ms  min-rtt: 79.526544ms  median-rtt: 179.709451ms  max-rtt: 417.974979ms
-clients: 20000  95per-rtt: 434.018193ms min-rtt: 85.338797ms  median-rtt: 189.017916ms  max-rtt: 435.916021ms
-clients: 21000  95per-rtt: 465.659769ms min-rtt: 109.001589ms median-rtt: 216.353628ms  max-rtt: 492.108389ms
-clients: 22000  95per-rtt: 463.333205ms min-rtt: 94.216702ms  median-rtt: 210.397052ms  max-rtt: 471.447606ms
-clients: 23000  95per-rtt: 439.975716ms min-rtt: 97.438912ms  median-rtt: 237.085804ms  max-rtt: 509.949147ms
-clients: 24000  95per-rtt: 435.028728ms min-rtt: 154.197944ms median-rtt: 241.178006ms  max-rtt: 444.462412ms
-clients: 25000  95per-rtt: 482.795612ms min-rtt: 107.152358ms median-rtt: 236.115307ms  max-rtt: 591.822568ms
-clients: 26000  95per-rtt: 444.560714ms min-rtt: 116.548815ms median-rtt: 245.43298ms max-rtt: 449.502996ms
+clients: 1000 95per-rtt: 19.068508ms  min-rtt: 5.661586ms median-rtt: 11.43604ms  max-rtt: 20.233983ms
+clients: 2000 95per-rtt: 39.804832ms  min-rtt: 8.786497ms median-rtt: 23.876935ms max-rtt: 46.466275ms
+clients: 3000 95per-rtt: 56.940112ms  min-rtt: 12.370118ms  median-rtt: 33.016691ms max-rtt: 66.260581ms
+clients: 4000 95per-rtt: 83.025259ms  min-rtt: 15.001412ms  median-rtt: 38.330875ms max-rtt: 94.530652ms
+clients: 5000 95per-rtt: 200.483998ms min-rtt: 21.062928ms  median-rtt: 48.160906ms max-rtt: 245.680525ms
+clients: 6000 95per-rtt: 105.949053ms min-rtt: 28.114776ms  median-rtt: 57.800535ms max-rtt: 118.244555ms
+clients: 7000 95per-rtt: 136.979192ms min-rtt: 26.27336ms median-rtt: 68.899924ms max-rtt: 148.83244ms
+clients: 8000 95per-rtt: 168.741428ms min-rtt: 32.012899ms  median-rtt: 88.965198ms max-rtt: 239.552503ms
+clients: 9000 95per-rtt: 174.028879ms min-rtt: 36.267111ms  median-rtt: 91.790536ms max-rtt: 178.265383ms
+clients: 10000  95per-rtt: 167.678472ms min-rtt: 48.35022ms median-rtt: 109.291803ms  max-rtt: 195.946632ms
+clients: 11000  95per-rtt: 233.652241ms min-rtt: 42.959773ms  median-rtt: 110.720413ms  max-rtt: 235.672417ms
+clients: 12000  95per-rtt: 284.406784ms min-rtt: 52.826935ms  median-rtt: 134.684984ms  max-rtt: 317.991623ms
+clients: 13000  95per-rtt: 303.479697ms min-rtt: 52.336142ms  median-rtt: 136.922273ms  max-rtt: 312.217755ms
+clients: 14000  95per-rtt: 254.934637ms min-rtt: 58.453362ms  median-rtt: 142.957663ms  max-rtt: 258.484249ms
+clients: 15000  95per-rtt: 348.906082ms min-rtt: 57.924255ms  median-rtt: 144.949643ms  max-rtt: 509.501408ms
+clients: 16000  95per-rtt: 286.786185ms min-rtt: 60.744334ms  median-rtt: 149.038632ms  max-rtt: 291.914422ms
+clients: 17000  95per-rtt: 340.648101ms min-rtt: 69.329914ms  median-rtt: 175.838588ms  max-rtt: 393.051149ms
+clients: 18000  95per-rtt: 298.480054ms min-rtt: 88.483256ms  median-rtt: 175.461905ms  max-rtt: 333.79096ms
+clients: 19000  95per-rtt: 321.692443ms min-rtt: 83.594707ms  median-rtt: 189.055287ms  max-rtt: 459.148253ms
+clients: 20000  95per-rtt: 300.176652ms min-rtt: 86.670549ms  median-rtt: 210.844101ms  max-rtt: 351.721358ms
+clients: 21000  95per-rtt: 363.2273ms min-rtt: 87.383433ms  median-rtt: 212.586524ms  max-rtt: 435.678217ms
+clients: 22000  95per-rtt: 449.707711ms min-rtt: 88.622982ms  median-rtt: 202.702634ms  max-rtt: 451.551634ms
+clients: 23000  95per-rtt: 472.065198ms min-rtt: 94.044268ms  median-rtt: 225.82286ms max-rtt: 703.937699ms
+clients: 24000  95per-rtt: 357.62932ms  min-rtt: 96.419307ms  median-rtt: 226.236334ms  max-rtt: 456.691215ms
+clients: 25000  95per-rtt: 409.991855ms min-rtt: 94.285234ms  median-rtt: 262.748417ms  max-rtt: 586.673801ms
+clients: 26000  95per-rtt: 485.100843ms min-rtt: 96.820203ms  median-rtt: 263.427992ms  max-rtt: 556.518015ms
+clients: 27000  95per-rtt: 462.195508ms min-rtt: 132.086659ms median-rtt: 265.027854ms  max-rtt: 480.348087ms
 ```
 
 Go GOMAXPROCS=1
