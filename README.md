@@ -84,7 +84,7 @@ bin/websocket-bench broadcast ws://earth.local:3334/ws -c 4 -s 40 -l 192.168.50.
 
 These results are from running the server on one machine and the benchmark tool as another. Both machines are 4ghz i7 4790Ks running Ubuntu 16.04. Tests were run multiple times and the best results were recorded.
 
-Rails
+Rails / MRI
 
 ```
 dev@mercury:~/hashrocket/websocket-shootout(master*)% bin/websocket-bench broadcast ws://earth.local:3334/cable -c 4 -s 40 --server-type actioncable --origin http://earth.local/ --step-size 100
@@ -94,6 +94,25 @@ clients: 300  95per-rtt: 305.479719ms min-rtt: 120.938445ms median-rtt: 247.1296
 clients: 400  95per-rtt: 434.046476ms min-rtt: 126.895039ms median-rtt: 315.440673ms  max-rtt: 557.648956ms
 clients: 500  95per-rtt: 434.529587ms min-rtt: 134.399069ms median-rtt: 354.620265ms  max-rtt: 456.082869ms
 clients: 600  95per-rtt: 494.355864ms min-rtt: 226.620769ms median-rtt: 420.114634ms  max-rtt: 575.684985ms
+```
+
+Rails / JRuby 9000
+
+```
+dev@mercury:~/hashrocket/websocket-shootout(master)% bin/websocket-bench broadcast ws://earth.local:3334/cable -c 4 -s 40 --server-type actioncable --origin http://earth.local/ --step-size 100 -l 192.16
+8.50.5 -l 192.168.50.246 -l 192.168.50.247 -l 192.168.50.247 -l 192.168.50.248 -l 192.168.50.249 -l 192.168.50.250 -l 192.168.50.251 -l 192.168.50.252
+clients: 100    95per-rtt: 135.271923ms min-rtt: 45.696185ms    median-rtt: 82.478786ms max-rtt: 135.839689ms
+clients: 200    95per-rtt: 127.661449ms min-rtt: 35.336308ms    median-rtt: 94.420956ms max-rtt: 129.662904ms
+clients: 300    95per-rtt: 136.20422ms  min-rtt: 34.792417ms    median-rtt: 128.454631ms        max-rtt: 136.812449ms
+clients: 400    95per-rtt: 174.77993ms  min-rtt: 46.763536ms    median-rtt: 165.975389ms        max-rtt: 178.201002ms
+clients: 500    95per-rtt: 207.032ms    min-rtt: 54.691042ms    median-rtt: 202.574751ms        max-rtt: 209.818699ms
+clients: 600    95per-rtt: 252.866648ms min-rtt: 66.275375ms    median-rtt: 241.725268ms        max-rtt: 253.188969ms
+clients: 700    95per-rtt: 282.251432ms min-rtt: 76.409456ms    median-rtt: 276.598779ms        max-rtt: 286.368834ms
+clients: 800    95per-rtt: 338.046487ms min-rtt: 88.129005ms    median-rtt: 321.792236ms        max-rtt: 343.384702ms
+clients: 900    95per-rtt: 394.672876ms min-rtt: 100.941704ms   median-rtt: 362.255439ms        max-rtt: 400.065225ms
+clients: 1000   95per-rtt: 428.743975ms min-rtt: 103.122624ms   median-rtt: 401.292141ms        max-rtt: 430.95828ms
+clients: 1100   95per-rtt: 478.716997ms min-rtt: 120.112795ms   median-rtt: 449.193742ms        max-rtt: 481.925251ms
+clients: 1200   95per-rtt: 495.453121ms min-rtt: 139.088222ms   median-rtt: 479.30502ms max-rtt: 495.712964ms
 ```
 
 C++
@@ -231,8 +250,9 @@ clients: 26000  95per-rtt: 450.70621ms  min-rtt: 135.185676ms median-rtt: 298.69
 
 Approximate memory usage as eyeballed in htop.
 
-* Go       ~800MB
-* C++       ~30MB
-* Clojure ~1500MB
-* Rails    ~150MB
-* Elixir  ~1900MB
+* Go           ~800MB
+* C++           ~30MB
+* Clojure     ~1500MB
+* Rails/MRI    ~150MB
+* Rails/JRuby  ~650MB
+* Elixir      ~1900MB
