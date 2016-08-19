@@ -246,6 +246,26 @@ clients: 25000  95per-rtt: 470.695838ms min-rtt: 76.527763ms  median-rtt: 281.64
 clients: 26000  95per-rtt: 450.70621ms  min-rtt: 135.185676ms median-rtt: 298.69296ms max-rtt: 472.417507ms
 ```
 
+Node / websocket/ws
+
+```
+dev@mercury:~/hashrocket/websocket-shootout(master)% bin/websocket-bench broadcast ws://earth.local:3334/ -c 4 -s 40 --step-size 1000 -l 192.168.50.5 -l 192.168.50.246 -l 192.168.50.247 -l 192.168.50.247 -l 192.168.50.248 -l 192.168.50.249 -l 192.168.50.250 -l 192.168.50.251 -l 192.
+168.50.252
+clients: 1000   95per-rtt: 95.369047ms  min-rtt: 10.405584ms    median-rtt: 32.373831ms max-rtt: 101.409014ms
+clients: 2000   95per-rtt: 75.917014ms  min-rtt: 17.451277ms    median-rtt: 69.920284ms max-rtt: 80.356555ms
+clients: 3000   95per-rtt: 148.712233ms min-rtt: 40.318376ms    median-rtt: 106.886806ms        max-rtt: 154.556827ms
+clients: 4000   95per-rtt: 151.083992ms min-rtt: 44.324963ms    median-rtt: 142.513751ms        max-rtt: 170.661407ms
+clients: 5000   95per-rtt: 182.167032ms min-rtt: 53.310994ms    median-rtt: 177.851188ms        max-rtt: 190.356621ms
+clients: 6000   95per-rtt: 265.657443ms min-rtt: 74.060424ms    median-rtt: 213.248346ms        max-rtt: 276.736378ms
+clients: 7000   95per-rtt: 257.626515ms min-rtt: 69.081739ms    median-rtt: 254.515757ms        max-rtt: 280.234958ms
+clients: 8000   95per-rtt: 313.892678ms min-rtt: 78.348859ms    median-rtt: 286.460658ms        max-rtt: 323.831551ms
+clients: 9000   95per-rtt: 327.006177ms min-rtt: 85.91383ms     median-rtt: 322.772751ms        max-rtt: 351.699221ms
+clients: 10000  95per-rtt: 484.308204ms min-rtt: 101.913195ms   median-rtt: 361.382127ms        max-rtt: 495.127526ms
+clients: 11000  95per-rtt: 428.247284ms min-rtt: 102.328162ms   median-rtt: 397.400563ms        max-rtt: 450.974968ms
+clients: 12000  95per-rtt: 426.49035ms  min-rtt: 110.056192ms   median-rtt: 422.095745ms        max-rtt: 462.87414ms
+clients: 13000  95per-rtt: 469.285695ms min-rtt: 137.837779ms   median-rtt: 463.512958ms        max-rtt: 508.345513ms
+```
+
 ### Memory Usage
 
 Approximate memory usage as eyeballed in htop.
@@ -256,3 +276,4 @@ Approximate memory usage as eyeballed in htop.
 * Rails/MRI    ~150MB
 * Rails/JRuby  ~650MB
 * Elixir      ~1900MB
+* Node/ws      ~300MB
