@@ -35,11 +35,6 @@ type ServerAdapter interface {
 	Receive() (*serverSentMsg, error)
 }
 
-type wsMsg struct {
-	Type    string      `json:"type"`
-	Payload interface{} `json:"payload"`
-}
-
 // serverSentMsg includes all fields that can be in server sent message
 type serverSentMsg struct {
 	Type          string      `json:"type"`
