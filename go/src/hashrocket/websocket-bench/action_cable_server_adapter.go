@@ -38,7 +38,7 @@ func (acsa *ActionCableServerAdapter) Startup() error {
 	return nil
 }
 
-func (acsa *ActionCableServerAdapter) SendEcho(payload interface{}) error {
+func (acsa *ActionCableServerAdapter) SendEcho(payload *Payload) error {
 	data, err := json.Marshal(map[string]interface{}{"action": "echo", "payload": payload})
 	if err != nil {
 		return err
@@ -51,7 +51,7 @@ func (acsa *ActionCableServerAdapter) SendEcho(payload interface{}) error {
 	})
 }
 
-func (acsa *ActionCableServerAdapter) SendBroadcast(payload interface{}) error {
+func (acsa *ActionCableServerAdapter) SendBroadcast(payload *Payload) error {
 	data, err := json.Marshal(map[string]interface{}{"action": "broadcast", "payload": payload})
 	if err != nil {
 		return err
@@ -71,8 +71,13 @@ func (acsa *ActionCableServerAdapter) Receive() (*serverSentMsg, error) {
 	}
 
 	message := msg.Message.(map[string]interface{})
+	payloadMap := message["payload"].(map[string]interface{})
+	payload := &Payload{SendTime: payloadMap["sendTime"].(string)}
+	if padding, ok := payloadMap["padding"]; ok {
+		payload.Padding = padding.(string)
+	}
 
-	return &serverSentMsg{Type: message["action"].(string), Payload: message["payload"]}, nil
+	return &serverSentMsg{Type: message["action"].(string), Payload: payload}, nil
 }
 
 func (acsa *ActionCableServerAdapter) receiveIgnoringPing() (*acsaMsg, error) {

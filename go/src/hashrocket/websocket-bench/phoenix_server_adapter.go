@@ -18,9 +18,8 @@ type psaMsg struct {
 
 func (psa *PhoenixServerAdapter) Startup() error {
 	err := websocket.JSON.Send(psa.conn, &psaMsg{
-		Topic:   "room:lobby",
-		Event:   "phx_join",
-		Payload: map[string]interface{}{},
+		Topic: "room:lobby",
+		Event: "phx_join",
 	})
 	if err != nil {
 		return err
@@ -39,7 +38,7 @@ func (psa *PhoenixServerAdapter) Startup() error {
 	return nil
 }
 
-func (psa *PhoenixServerAdapter) SendEcho(payload interface{}) error {
+func (psa *PhoenixServerAdapter) SendEcho(payload *Payload) error {
 	return websocket.JSON.Send(psa.conn, &psaMsg{
 		Topic:   "room:lobby",
 		Event:   "echo",
@@ -47,7 +46,7 @@ func (psa *PhoenixServerAdapter) SendEcho(payload interface{}) error {
 	})
 }
 
-func (psa *PhoenixServerAdapter) SendBroadcast(payload interface{}) error {
+func (psa *PhoenixServerAdapter) SendBroadcast(payload *Payload) error {
 	return websocket.JSON.Send(psa.conn, &psaMsg{
 		Topic:   "room:lobby",
 		Event:   "broadcast",
@@ -73,5 +72,10 @@ func (psa *PhoenixServerAdapter) Receive() (*serverSentMsg, error) {
 		payload = msg.Payload
 	}
 
-	return &serverSentMsg{Type: payload["type"].(string), Payload: payload["body"]}, nil
+	body := payload["body"].(map[string]interface{})
+
+	return &serverSentMsg{Type: payload["type"].(string), Payload: &Payload{
+		SendTime: body["sendTime"].(string),
+		Padding:  body["padding"].(string),
+	}}, nil
 }

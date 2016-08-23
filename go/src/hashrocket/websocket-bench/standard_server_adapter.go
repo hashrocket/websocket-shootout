@@ -9,15 +9,15 @@ type StandardServerAdapter struct {
 }
 
 type ssaMsg struct {
-	Type    string      `json:"type"`
-	Payload interface{} `json:"payload"`
+	Type    string   `json:"type"`
+	Payload *Payload `json:"payload"`
 }
 
-func (ssa *StandardServerAdapter) SendEcho(payload interface{}) error {
+func (ssa *StandardServerAdapter) SendEcho(payload *Payload) error {
 	return websocket.JSON.Send(ssa.conn, &ssaMsg{Type: "echo", Payload: payload})
 }
 
-func (ssa *StandardServerAdapter) SendBroadcast(payload interface{}) error {
+func (ssa *StandardServerAdapter) SendBroadcast(payload *Payload) error {
 	return websocket.JSON.Send(ssa.conn, &ssaMsg{Type: "broadcast", Payload: payload})
 }
 

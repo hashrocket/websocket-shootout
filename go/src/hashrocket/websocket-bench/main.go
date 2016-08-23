@@ -5,21 +5,23 @@ import (
 	"log"
 	"net"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
 )
 
 var options struct {
-	websocketURL    string
-	websocketOrigin string
-	serverType      string
-	concurrent      int
-	sampleSize      int
-	stepSize        int
-	limitPercentile int
-	limitRTT        time.Duration
-	localAddrs      []string
+	websocketURL       string
+	websocketOrigin    string
+	serverType         string
+	concurrent         int
+	sampleSize         int
+	stepSize           int
+	limitPercentile    int
+	limitRTT           time.Duration
+	payloadPaddingSize int
+	localAddrs         []string
 }
 
 func main() {
@@ -39,6 +41,7 @@ func main() {
 	cmdEcho.Flags().IntVarP(&options.sampleSize, "sample-size", "s", 10000, "number of echoes in a sample")
 	cmdEcho.Flags().IntVarP(&options.stepSize, "step-size", "", 5000, "number of clients to increase each step")
 	cmdEcho.Flags().IntVarP(&options.limitPercentile, "limit-percentile", "", 95, "round-trip time percentile to for limit")
+	cmdEcho.Flags().IntVarP(&options.payloadPaddingSize, "payload-padding", "", 0, "payload padding size")
 	cmdEcho.Flags().DurationVarP(&options.limitRTT, "limit-rtt", "", time.Millisecond*500, "Max RTT at limit percentile")
 	rootCmd.AddCommand(cmdEcho)
 
@@ -52,6 +55,7 @@ func main() {
 	cmdBroadcast.Flags().IntVarP(&options.sampleSize, "sample-size", "s", 20, "number of broadcasts in a sample")
 	cmdBroadcast.Flags().IntVarP(&options.stepSize, "step-size", "", 5000, "number of clients to increase each step")
 	cmdBroadcast.Flags().IntVarP(&options.limitPercentile, "limit-percentile", "", 95, "round-trip time percentile to for limit")
+	cmdBroadcast.Flags().IntVarP(&options.payloadPaddingSize, "payload-padding", "", 0, "payload padding size")
 	cmdBroadcast.Flags().DurationVarP(&options.limitRTT, "limit-rtt", "", time.Millisecond*500, "Max RTT at limit percentile")
 	rootCmd.AddCommand(cmdBroadcast)
 
@@ -80,9 +84,12 @@ func Stress(cmd *cobra.Command, args []string) {
 	rttResultChan := make(chan time.Duration)
 	doneChan := make(chan error)
 
+	payloadPadding := strings.Repeat("1234567890", options.payloadPaddingSize/10+1)
+	payloadPadding = payloadPadding[:options.payloadPaddingSize]
+
 	clientCount := 0
 	for {
-		if err := startClients(options.serverType, options.stepSize, localAddrs, cmdChan, rttResultChan, doneChan); err != nil {
+		if err := startClients(options.serverType, options.stepSize, localAddrs, cmdChan, rttResultChan, doneChan, payloadPadding); err != nil {
 			log.Fatal(err)
 		}
 		clientCount += options.stepSize
@@ -124,10 +131,10 @@ func Stress(cmd *cobra.Command, args []string) {
 	}
 }
 
-func startClients(serverType string, count int, localAddrs []*net.TCPAddr, cmdChan <-chan int, rttResultChan chan time.Duration, doneChan chan error) error {
+func startClients(serverType string, count int, localAddrs []*net.TCPAddr, cmdChan <-chan int, rttResultChan chan time.Duration, doneChan chan error, padding string) error {
 	for i := 0; i < count; i++ {
 		laddr := localAddrs[i%len(localAddrs)]
-		c, err := NewClient(laddr, options.websocketURL, options.websocketOrigin, serverType, cmdChan, rttResultChan, doneChan)
+		c, err := NewClient(laddr, options.websocketURL, options.websocketOrigin, serverType, cmdChan, rttResultChan, doneChan, padding)
 		if err != nil {
 			return err
 		}
