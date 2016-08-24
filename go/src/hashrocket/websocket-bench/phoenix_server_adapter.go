@@ -73,9 +73,13 @@ func (psa *PhoenixServerAdapter) Receive() (*serverSentMsg, error) {
 	}
 
 	body := payload["body"].(map[string]interface{})
+	var padding string
+	if p, ok := body["padding"].(string); ok {
+		padding = p
+	}
 
 	return &serverSentMsg{Type: payload["type"].(string), Payload: &Payload{
 		SendTime: body["sendTime"].(string),
-		Padding:  body["padding"].(string),
+		Padding:  padding,
 	}}, nil
 }
