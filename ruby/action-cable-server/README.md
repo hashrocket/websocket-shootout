@@ -1,24 +1,22 @@
-# README
+# Rails Action Cable Server
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## Dependencies
 
-Things you may want to cover:
+* Ruby 2.3+
+* Redis
 
-* Ruby version
+```
+bundle install
+```
 
-* System dependencies
+To run the server:
 
-* Configuration
+```
+SECRET_KEY_BASE=REPLACEME rails s -p 3334 -e production
+```
 
-* Database creation
+The raw message to send to a connection to join a channel is as follows:
 
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+```
+{"command":"subscribe","identifier":"{\"channel\":\"BenchmarkChannel\"}"}
+```
