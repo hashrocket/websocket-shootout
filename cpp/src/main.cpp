@@ -15,6 +15,7 @@
 struct cliOptions {
 	std::string address;
 	int port;
+	int threadCount;
 };
 
 std::unique_ptr<cliOptions> parseCLI(int argc, const char * argv[]) {
@@ -23,12 +24,15 @@ std::unique_ptr<cliOptions> parseCLI(int argc, const char * argv[]) {
 	cmd.add(addressArg);
 	TCLAP::ValueArg<int> portArg("", "port", "port to listen on", false, 3000, "int");
 	cmd.add(portArg);
+	TCLAP::ValueArg<int> threadCountArg("", "thread", "number of threads", false, 8, "int");
+	cmd.add(threadCountArg);
 
 	cmd.parse(argc, argv);
 
 	auto options = std::make_unique<cliOptions>();
 	options->address = addressArg.getValue();
 	options->port = portArg.getValue();
+	options->threadCount = threadCountArg.getValue();
 
 	return options;
 }
@@ -49,7 +53,7 @@ int main(int argc, const char * argv[]) {
 			cliOptions->port
 		);
 		server s(ep);
-		s.run();
+		s.run(cliOptions->threadCount);
 	}
 	catch (websocketpp::exception const & e) {
 		std::cout << e.what() << std::endl;

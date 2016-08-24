@@ -2,6 +2,8 @@
 
 #include <json/json.h>
 
+#include <boost/thread/shared_lock_guard.hpp>
+
 #include "server.h"
 
 server::server(boost::asio::ip::tcp::endpoint ep) {
@@ -18,18 +20,26 @@ server::server(boost::asio::ip::tcp::endpoint ep) {
 	wspp_server.set_message_handler(bind(&server::on_message, this, _1, _2));
 
 	wspp_server.listen(ep);
+	wspp_server.start_accept();
 }
 
-void server::run() {
-	wspp_server.start_accept();
-	wspp_server.run();
+void server::run(int threadCount) {
+	boost::thread_group tg;
+
+	for (int i = 0; i < threadCount; i++) {
+		tg.add_thread(new boost::thread(&websocketpp::server<websocketpp::config::asio>::run, &wspp_server));
+	}
+
+	tg.join_all();
 }
 
 void server::on_open(websocketpp::connection_hdl hdl) {
+	boost::lock_guard<boost::shared_mutex> lock(conns_mutex);
 	conns.insert(hdl);
 }
 
 void server::on_close(websocketpp::connection_hdl hdl) {
+	boost::lock_guard<boost::shared_mutex> lock(conns_mutex);
 	conns.erase(hdl);
 }
 
@@ -73,6 +83,8 @@ void server::broadcast(websocketpp::connection_hdl src_hdl, const Json::Value &s
 	dst_msg["type"] = "broadcast";
 	dst_msg["payload"] = src_msg["payload"];
 	auto dst_msg_str = json_to_string(dst_msg);
+
+	boost::shared_lock_guard<boost::shared_mutex> lock(conns_mutex);
 
 	for (auto hdl : conns) {
 		wspp_server.send(hdl, dst_msg_str, websocketpp::frame::opcode::text);

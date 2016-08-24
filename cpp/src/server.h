@@ -6,12 +6,14 @@
 #include <websocketpp/config/asio_no_tls.hpp>
 #include <websocketpp/server.hpp>
 
+#include <boost/thread/thread.hpp>
+
 #include <json/json.h>
 
 class server {
 public:
 	server(boost::asio::ip::tcp::endpoint ep);
-	void run();
+	void run(int threadCount);
 
 private:
 	void on_open(websocketpp::connection_hdl hdl);
@@ -24,5 +26,7 @@ private:
 	std::string json_to_string(Json::Value json);
 
 	websocketpp::server<websocketpp::config::asio> wspp_server;
+
+	boost::shared_mutex conns_mutex;
 	std::set<websocketpp::connection_hdl, std::owner_less<websocketpp::connection_hdl>> conns;
 };
