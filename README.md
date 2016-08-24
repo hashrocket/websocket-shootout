@@ -8,7 +8,7 @@ Example broadcast message:
 {"type":"broadcast","payload":{"foo": "bar"}}
 ```
 
-For the platforms where with low level websocket implementations the above message would work directly. For platforms with higher level abstractions such as Phoenix and Rails the message must be encoded to be compatible with there message standards.
+For the platforms with low level websocket implementations the above message would work directly. For platforms with higher level abstractions such as Phoenix and Rails the message must be encoded to be compatible with their message standards.
 
 ## Platforms
 
