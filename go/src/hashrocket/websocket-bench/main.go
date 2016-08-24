@@ -121,14 +121,18 @@ func Stress(cmd *cobra.Command, args []string) {
 			return
 		}
 
-		fmt.Printf("clients: %d\t%dper-rtt: %v\tmin-rtt: %v\tmedian-rtt: %v\tmax-rtt: %v\n",
+		fmt.Printf("clients: %5d    %dper-rtt: %3dms    min-rtt: %3dms    median-rtt: %3dms    max-rtt: %3dms\n",
 			clientCount,
 			options.limitPercentile,
-			rttAgg.Percentile(options.limitPercentile),
-			rttAgg.Min(),
-			rttAgg.Percentile(50),
-			rttAgg.Max())
+			roundToMS(rttAgg.Percentile(options.limitPercentile)),
+			roundToMS(rttAgg.Min()),
+			roundToMS(rttAgg.Percentile(50)),
+			roundToMS(rttAgg.Max()))
 	}
+}
+
+func roundToMS(d time.Duration) int64 {
+	return int64((d + (500 * time.Microsecond)) / time.Millisecond)
 }
 
 func startClients(serverType string, count int, localAddrs []*net.TCPAddr, cmdChan <-chan int, rttResultChan chan time.Duration, doneChan chan error, padding string) error {
