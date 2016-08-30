@@ -39,7 +39,7 @@ clients:  5000    95per-rtt: 184ms    min-rtt:  37ms    median-rtt:  95ms    max
 
 ```
 
-The above benchmark starts by connecting 100 websocket clients to ws://earth.local:3334/ws. Then it sends 100 broadcast requests with a concurrency of 10. It increases by 1000 clients at a time until the 95th percentile round-trip time exceeds 250ms.
+The above benchmark starts by connecting 1000 websocket clients to ws://earth.local:3334/ws. Then it sends 100 broadcast requests with a concurrency of 10. It increases by 1000 clients at a time until the 95th percentile round-trip time exceeds 250ms.
 
 ## Open file limits
 
@@ -107,15 +107,39 @@ These results are from running the server on one machine and the benchmark tool 
 C++
 ```
 $ bin/websocket-bench broadcast ws://earth.local:3334/ws -l 192.168.50.5 -l 192.168.50.246 -l 192.168.50.247 -c 4 -s 40 --step-size 1000
-clients:  1000    95per-rtt:  47ms    min-rtt:  21ms    median-rtt:  33ms    max-rtt:  52ms
-clients:  2000    95per-rtt:  90ms    min-rtt:  32ms    median-rtt:  69ms    max-rtt:  92ms
-clients:  3000    95per-rtt: 138ms    min-rtt:  51ms    median-rtt: 104ms    max-rtt: 141ms
-clients:  4000    95per-rtt: 184ms    min-rtt:  47ms    median-rtt: 139ms    max-rtt: 193ms
-clients:  5000    95per-rtt: 266ms    min-rtt:  84ms    median-rtt: 199ms    max-rtt: 272ms
-clients:  6000    95per-rtt: 322ms    min-rtt:  96ms    median-rtt: 246ms    max-rtt: 326ms
-clients:  7000    95per-rtt: 390ms    min-rtt: 114ms    median-rtt: 287ms    max-rtt: 391ms
-clients:  8000    95per-rtt: 445ms    min-rtt: 134ms    median-rtt: 335ms    max-rtt: 446ms
-clients:  9000    95per-rtt: 491ms    min-rtt: 146ms    median-rtt: 349ms    max-rtt: 494ms
+clients:  1000    95per-rtt:  41ms    min-rtt:   7ms    median-rtt:  12ms    max-rtt:  44ms
+clients:  2000    95per-rtt:  42ms    min-rtt:  14ms    median-rtt:  26ms    max-rtt:  47ms
+clients:  3000    95per-rtt:  50ms    min-rtt:  26ms    median-rtt:  34ms    max-rtt:  52ms
+clients:  4000    95per-rtt:  57ms    min-rtt:  36ms    median-rtt:  48ms    max-rtt:  76ms
+clients:  5000    95per-rtt:  90ms    min-rtt:  37ms    median-rtt:  51ms    max-rtt:  97ms
+clients:  6000    95per-rtt:  78ms    min-rtt:  54ms    median-rtt:  64ms    max-rtt:  87ms
+clients:  7000    95per-rtt: 134ms    min-rtt:  57ms    median-rtt:  87ms    max-rtt: 141ms
+clients:  8000    95per-rtt: 123ms    min-rtt:  84ms    median-rtt:  97ms    max-rtt: 132ms
+clients:  9000    95per-rtt: 180ms    min-rtt:  78ms    median-rtt: 100ms    max-rtt: 187ms
+clients: 10000    95per-rtt: 160ms    min-rtt:  78ms    median-rtt: 113ms    max-rtt: 180ms
+clients: 11000    95per-rtt: 197ms    min-rtt:  94ms    median-rtt: 126ms    max-rtt: 252ms
+clients: 12000    95per-rtt: 195ms    min-rtt:  92ms    median-rtt: 136ms    max-rtt: 197ms
+clients: 13000    95per-rtt: 188ms    min-rtt: 123ms    median-rtt: 152ms    max-rtt: 199ms
+clients: 14000    95per-rtt: 187ms    min-rtt: 125ms    median-rtt: 144ms    max-rtt: 244ms
+clients: 15000    95per-rtt: 240ms    min-rtt: 123ms    median-rtt: 158ms    max-rtt: 258ms
+clients: 16000    95per-rtt: 411ms    min-rtt: 125ms    median-rtt: 191ms    max-rtt: 424ms
+clients: 17000    95per-rtt: 375ms    min-rtt: 150ms    median-rtt: 198ms    max-rtt: 375ms
+clients: 18000    95per-rtt: 328ms    min-rtt: 167ms    median-rtt: 240ms    max-rtt: 330ms
+clients: 19000    95per-rtt: 272ms    min-rtt: 150ms    median-rtt: 211ms    max-rtt: 377ms
+clients: 20000    95per-rtt: 254ms    min-rtt: 174ms    median-rtt: 213ms    max-rtt: 373ms
+clients: 21000    95per-rtt: 364ms    min-rtt: 161ms    median-rtt: 276ms    max-rtt: 468ms
+clients: 22000    95per-rtt: 315ms    min-rtt: 220ms    median-rtt: 251ms    max-rtt: 317ms
+clients: 23000    95per-rtt: 263ms    min-rtt: 189ms    median-rtt: 230ms    max-rtt: 372ms
+clients: 24000    95per-rtt: 348ms    min-rtt: 203ms    median-rtt: 263ms    max-rtt: 373ms
+clients: 25000    95per-rtt: 341ms    min-rtt: 267ms    median-rtt: 295ms    max-rtt: 359ms
+clients: 26000    95per-rtt: 358ms    min-rtt: 234ms    median-rtt: 283ms    max-rtt: 581ms
+clients: 27000    95per-rtt: 412ms    min-rtt: 215ms    median-rtt: 278ms    max-rtt: 466ms
+clients: 28000    95per-rtt: 444ms    min-rtt: 274ms    median-rtt: 347ms    max-rtt: 448ms
+clients: 29000    95per-rtt: 383ms    min-rtt: 270ms    median-rtt: 322ms    max-rtt: 450ms
+clients: 30000    95per-rtt: 473ms    min-rtt: 253ms    median-rtt: 328ms    max-rtt: 562ms
+clients: 31000    95per-rtt: 471ms    min-rtt: 293ms    median-rtt: 381ms    max-rtt: 517ms
+clients: 32000    95per-rtt: 463ms    min-rtt: 290ms    median-rtt: 369ms    max-rtt: 483ms
+clients: 33000    95per-rtt: 476ms    min-rtt: 299ms    median-rtt: 352ms    max-rtt: 692ms
 ```
 
 Clojure
@@ -257,7 +281,7 @@ clients: 13000    95per-rtt: 476ms    min-rtt: 129ms    median-rtt: 433ms    max
 Approximate memory usage as eyeballed in htop.
 
 * Go           ~800MB
-* C++           ~30MB
+* C++          ~600MB
 * Clojure     ~1500MB
 * Rails/MRI    ~150MB
 * Rails/JRuby  ~650MB
