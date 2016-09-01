@@ -25,3 +25,4 @@ bin/rust-ws-server : rust/target/release/rust-ws-server
 clean :
 	rm -f bin/*
 	rm -f $(GOPATH)/bin/*
+	rm -f rust/target/*
