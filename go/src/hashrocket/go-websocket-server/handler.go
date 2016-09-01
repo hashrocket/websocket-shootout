@@ -71,6 +71,7 @@ func (h *benchHandler) echo(ws *websocket.Conn, payload interface{}) error {
 
 func (h *benchHandler) broadcast(ws *websocket.Conn, payload interface{}) error {
 	result := BroadcastResult{Type: "broadcastResult", Payload: payload}
+	request := &WsMsg{Type: "broadcast", Payload: payload}
 
 	wg := sync.WaitGroup{}
 	var count int64
@@ -79,7 +80,7 @@ func (h *benchHandler) broadcast(ws *websocket.Conn, payload interface{}) error 
 	for c := range h.conns {
 		wg.Add(1)
 		go func(ws *websocket.Conn) {
-			if err := websocket.JSON.Send(ws, &WsMsg{Type: "broadcast", Payload: payload}); err == nil {
+			if err := websocket.JSON.Send(ws, request); err == nil {
 				atomic.AddInt64(&count, 1)
 			}
 			wg.Done()
