@@ -1,6 +1,8 @@
 # websocket-shootout
 
-This project is designed to compare websocket servers in multiple languages and frameworks. The servers all implement an extremely simple protocol with only two messages: `echo` and `broadcast`. An echo is returned to the sending client. A broadcast is sent to all connected clients. Both messages take a payload value that should be delivered to the appropriate destination.
+This project is designed to compare websocket servers in multiple languages and frameworks and has a [companion blog post][post]. The servers all implement an extremely simple protocol with only two messages: `echo` and `broadcast`. An echo is returned to the sending client. A broadcast is sent to all connected clients. Both messages take a payload value that should be delivered to the appropriate destination.
+
+[post]: https://hashrocket.com/blog/posts/websocket-shootout
 
 Example broadcast message:
 
