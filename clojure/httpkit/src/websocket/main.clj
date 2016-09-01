@@ -13,7 +13,7 @@
   (Integer/parseInt (or port (env :port) "3000")))
 
 (defn start-server [port]
-  (reset! server (http-kit/run-server app {:port port})))
+  (reset! server (http-kit/run-server app {:port port :thread 32})))
 
 (defn stop-server []
   (when @server
