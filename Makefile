@@ -1,7 +1,7 @@
 GOPATH=$(CURDIR)/go
 
 .PHONY : all
-all : bin/go-websocket-server bin/websocket-bench bin/cpp-websocket-server
+all : bin/go-websocket-server bin/websocket-bench bin/cpp-websocket-server bin/rust-ws-server
 
 bin/go-websocket-server : $(GOPATH)/bin/go-websocket-server
 	cp $< $@
@@ -18,7 +18,11 @@ $(GOPATH)/bin/websocket-bench : $(GOPATH)/src/hashrocket/websocket-bench/*.go
 bin/cpp-websocket-server : cpp/src/*
 	g++ -std=c++14 -I cpp/vendor/jsoncpp/include cpp/src/*.cpp cpp/vendor/jsoncpp/src/jsoncpp.cpp -lboost_system -lboost_thread -o bin/cpp-websocket-server
 
+bin/rust-ws-server : rust/target/release/rust-ws-server
+        cargo build --release
+
 .PHONY : clean
 clean :
 	rm -f bin/*
 	rm -f $(GOPATH)/bin/*
+	rm -f rust/target/*

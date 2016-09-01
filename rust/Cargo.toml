@@ -1,0 +1,10 @@
+[package]
+name = "rust-ws-server"
+version = "0.1.0"
+authors = [""]
+
+[dependencies]
+ws = "0.5.1"
+serde = "0.8"
+serde_json = "0.8"
+clap = "2.11"
