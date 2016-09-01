@@ -7,3 +7,4 @@ authors = [""]
 ws = "0.5.1"
 serde = "0.8"
 serde_json = "0.8"
+clap = "2.11"
