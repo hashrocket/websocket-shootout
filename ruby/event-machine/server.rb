@@ -11,7 +11,6 @@ EM.run {
     }
 
     ws.onmessage { |msg|
-      puts msg.inspect
       cmd, payload = JSON(msg).values_at('type', 'payload')
       if cmd == 'echo'
         ws.send payload.to_json
