@@ -19,10 +19,13 @@ bin/cpp-websocket-server : cpp/src/*
 	g++ -std=c++14 -I cpp/vendor/jsoncpp/include cpp/src/*.cpp cpp/vendor/jsoncpp/src/jsoncpp.cpp -lboost_system -lboost_thread -o bin/cpp-websocket-server
 
 bin/rust-ws-server : rust/target/release/rust-ws-server
-        cargo build --release
+	cp $< $@
+
+rust/target/release/rust-ws-server : rust/src/*
+	cd rust && cargo build --release
 
 .PHONY : clean
 clean :
 	rm -f bin/*
 	rm -f $(GOPATH)/bin/*
-	rm -f rust/target/*
+	rm -rf rust/target/*
