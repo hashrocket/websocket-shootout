@@ -22,16 +22,16 @@ EM.run {
 
   EM::WebSocket.run(:host => address, :port => port) do |ws|
     ws.onopen {
-      sid = @channel.subscribe {|msg| ws.send msg }
-      @channel.push "#{sid} connected"
+      @channel.subscribe {|msg| ws.send msg }
     }
 
     ws.onmessage { |msg|
       cmd, payload = JSON(msg).values_at('type', 'payload')
       if cmd == 'echo'
-        ws.send payload.to_json
+        ws.send({type: 'echo', payload: payload}.to_json)
       else
-        @channel.push payload.to_json
+        @channel.push({type: 'broadcast', payload: payload}.to_json)
+        ws.send({type: "broadcastResult", payload: payload}.to_json)
       end
     }
   end
