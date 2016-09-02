@@ -11,6 +11,7 @@ To build the server:
     which java # ensure you have java installed
     which boot # ensure you have boot installed
     boot -u    # keep boot up-to-date
+    export BOOT_JVM_OPTIONS=-Dclojure.compiler.direct-linking=true  # enable direct linking
     boot build # builds an uberjar to the build/ directory
 
 Then, to run the server:
