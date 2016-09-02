@@ -16,25 +16,25 @@ struct BenchHandler {
 
 impl ws::Handler for BenchHandler {
     fn on_message(&mut self, msg: ws::Message) -> ws::Result<()> {
-        if let Some((Some(msg_type), payload)) = msg.into_text().ok()
-            .map(|v| v.as_str().to_owned())
-            .and_then(|body: String| serde_json::from_str(body.as_str()).ok())
-            .and_then(|j: Value| j.as_object().map(move |obj: &Map<String, Value>| {
-                let t = obj.get("type").and_then(|t| t.as_str()).map(|s| s.to_owned());
-                let p: Value = obj.get("payload").unwrap_or(&Value::Null).clone();
-                (t, p)
-            })) {
+        if let Ok(body) = msg.into_text() {
+            if let Some((Some(msg_type), payload)) = serde_json::from_str(body.as_str()).ok()
+                .and_then(|j: Value| j.as_object().map(move |obj: &Map<String, Value>| {
+                    let t = obj.get("type").and_then(|t| t.as_str()).map(|s| s.to_owned());
+                    let p: Value = obj.get("payload").unwrap_or(&Value::Null).clone();
+                    (t, p)
+                })) {
                 match msg_type.as_ref() {
                     "echo" => {
-                        try!(self.ws.send(format!("{}", payload)));
+                        try!(self.ws.send(body.as_str()));
                     },
                     "broadcast" => {
-                        try!(self.ws.broadcast(format!("{}", payload)));
+                        try!(self.ws.broadcast(body.as_str()));
                         try!(self.ws.send(format!("{{\"type\": \"broadcastResult\", \"listenCount\": {}, \"payload\": {}}}", self.count, payload)))
                     },
                     _ => {}
                 };
             };
+        }
         Ok(())
     }
 
@@ -67,11 +67,12 @@ fn main() {
             .default_value("3000"))
         .get_matches();
     if let (Some(address), Some(port)) = (matches.value_of("address"), matches.value_of("port")) {
-        if let Err(error) = ws::listen(format!("{}:{}", address, port).as_str(), |out| {
+        ws::Builder::new().with_settings(ws::Settings {
+            max_connections: 500_000,
+            ..ws::Settings::default()
+        }).build(|out| {
             BenchHandler { ws: out, count: 0 }
-        }) {
-            println!("Failed to create WebSocket due to {:?}", error);
-        }
+        }).unwrap().listen(format!("{}:{}", address, port).as_str()).unwrap();
     } else {
         println!("{}", matches.usage());
     }
