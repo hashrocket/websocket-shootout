@@ -12,7 +12,7 @@ In addition to the standard build chain including a C++ compiler with C++14 supp
 On Ubuntu 16.04 the required dependencies can be installed with the following command:
 
 ```
-sudo apt install build-essentials libjsoncpp-dev libtclap-dev libwebsocketpp-dev libboost-all-dev
+sudo apt install build-essential libjsoncpp-dev libtclap-dev libwebsocketpp-dev libboost-all-dev
 ```
 
 ## Build Instructions
