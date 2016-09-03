@@ -79,5 +79,5 @@ main = do
   -- IO (InChan, [OutChan]) from where we can draw duplicate output channels
   -- transparently. Otherwise the prototypical OutChan will just accumulate
   -- payloads until it overflows
-  -- C.forkIO $ forever $ readChan outp
+  C.forkIO $ forever $ readChan outp
   runServer "127.0.0.1" 3000 (wsApp inp)
