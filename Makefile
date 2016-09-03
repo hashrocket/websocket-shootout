@@ -29,7 +29,10 @@ bin/hs-websocket-server:
 	cd haskell && cp `stack path --dist-dir`/build/hs-websocket-server/hs-websocket-server ../bin/
 
 bench:
-	bin/websocket-bench broadcast ws://127.0.0.1:3000/ws --concurrent 10 --sample-size 100 --step-size 2500 --limit-percentile 95 --limit-rtt 250ms
+	bin/websocket-bench broadcast ws://127.0.0.1:3000/ws --concurrent 10 --sample-size 100 --step-size 1000 --limit-percentile 95 --limit-rtt 250ms
+
+gentle-bench:
+	bin/websocket-bench broadcast ws://127.0.0.1:3000/ws --concurrent 2 --sample-size 100 --step-size 10 --limit-percentile 95 --limit-rtt 250ms
 
 .PHONY : clean
 clean :

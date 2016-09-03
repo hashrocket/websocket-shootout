@@ -55,8 +55,10 @@ bidiHandler inp conn = do
     msg <- receiveDataMessage conn
     case msg of
       Text t -> do
-        let Just payload = t ^? key "payload"
-        case t ^? key "type" . _String of
+        let Just v = decode t :: Maybe Value
+            Just payload = v ^? key "payload"
+            eventType = v ^? key "type" . _String
+        case eventType of
           Just "echo" -> sendTextData conn (mkPayload "echo" payload)
           Just "broadcast" -> do
             writeChan inp (mkPayload "broadcast" payload)
