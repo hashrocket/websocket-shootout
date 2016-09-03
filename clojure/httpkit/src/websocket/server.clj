@@ -35,7 +35,7 @@
 (defn ws-handler [request]
   (with-channel request channel
     (connect! channel)
-    (on-close channel (partial disconnect! channel))
+    (on-close channel #(disconnect! channel %))
     (on-receive channel #(dispatch channel %))))
 
 (defroutes websocket-routes
