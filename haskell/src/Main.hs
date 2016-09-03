@@ -55,8 +55,10 @@ bidiHandler inp conn = do
     msg <- receiveDataMessage conn
     case msg of
       Text t -> do
-        let Just payload = t ^? key "payload"
-        case t ^? key "type" . _String of
+        let Just v = decode t :: Maybe Value
+            Just payload = v ^? key "payload"
+            eventType = v ^? key "type" . _String
+        case eventType of
           Just "echo" -> sendTextData conn (mkPayload "echo" payload)
           Just "broadcast" -> do
             writeChan inp (mkPayload "broadcast" payload)
@@ -77,5 +79,5 @@ main = do
   -- IO (InChan, [OutChan]) from where we can draw duplicate output channels
   -- transparently. Otherwise the prototypical OutChan will just accumulate
   -- payloads until it overflows
-  C.forkIO $ forever $ readChan outp
+  -- C.forkIO $ forever $ readChan outp
   runServer "127.0.0.1" 3000 (wsApp inp)
