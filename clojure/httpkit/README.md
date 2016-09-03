@@ -16,7 +16,7 @@ To build the server:
 
 Then, to run the server:
 
-    java -server -XX:+AggressiveOpts -Xms2g -Xmx2g -jar build/app.jar # defaults to port 3000
+    java -server -XX:+AggressiveOpts -Xms8g -Xmx8g -jar build/app.jar # defaults to port 3000
 
 OR
 
