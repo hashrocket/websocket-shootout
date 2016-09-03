@@ -8,11 +8,9 @@
 (defonce channels (atom #{}))
 
 (defn connect! [channel]
-  (log/info "channel open")
   (swap! channels conj channel))
 
 (defn disconnect! [channel status]
-  (log/info "channel closed:" status)
   (swap! channels disj channel))
 
 (defn broadcast [ch payload]
