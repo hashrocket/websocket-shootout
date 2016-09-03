@@ -75,9 +75,4 @@ wsApp inp pending = do
 main :: IO ()
 main = do
   (inp, outp) <- newChan
-  -- This is really unfortunate... We need some lazy IO like
-  -- IO (InChan, [OutChan]) from where we can draw duplicate output channels
-  -- transparently. Otherwise the prototypical OutChan will just accumulate
-  -- payloads until it overflows
-  C.forkIO $ forever $ readChan outp
   runServer "127.0.0.1" 3000 (wsApp inp)
