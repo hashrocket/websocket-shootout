@@ -15,8 +15,7 @@
 
 (defn broadcast [ch payload]
   (let [msg (json/encode {:type "broadcast" :payload payload})]
-    (doseq [channel @channels]
-      (send! channel msg)))
+    (run! #(send! % msg) @channels))
   (send! ch (json/encode {:type "broadcastResult" :payload payload})))
 
 (defn echo [ch payload]
