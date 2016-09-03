@@ -20,9 +20,8 @@ executable hs-websocket-server
   build-depends:       base >= 4.7 && < 5
                      , aeson
                      , async
-                     , broadcast-chan
                      , bytestring
-                     , concurrent-extra
+                     , unagi-chan
                      , containers
                      , http-types
                      , lens
