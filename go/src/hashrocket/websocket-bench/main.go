@@ -117,10 +117,6 @@ func Stress(cmd *cobra.Command, args []string) {
 			}
 		}
 
-		if options.limitRTT < rttAgg.Percentile(options.limitPercentile) {
-			return
-		}
-
 		fmt.Printf("clients: %5d    %dper-rtt: %3dms    min-rtt: %3dms    median-rtt: %3dms    max-rtt: %3dms\n",
 			clientCount,
 			options.limitPercentile,
@@ -128,6 +124,10 @@ func Stress(cmd *cobra.Command, args []string) {
 			roundToMS(rttAgg.Min()),
 			roundToMS(rttAgg.Percentile(50)),
 			roundToMS(rttAgg.Max()))
+
+		if options.limitRTT < rttAgg.Percentile(options.limitPercentile) {
+			return
+		}
 	}
 }
 
