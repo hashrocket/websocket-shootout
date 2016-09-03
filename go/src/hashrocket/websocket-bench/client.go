@@ -16,18 +16,19 @@ const (
 )
 
 type Client struct {
-	conn           *websocket.Conn
-	config         *websocket.Config
-	laddr          *net.TCPAddr
-	dest           string
-	origin         string
-	serverType     string
-	serverAdapter  ServerAdapter
-	cmdChan        <-chan int
-	rxErrChan      chan error
-	rttResultChan  chan time.Duration
-	doneChan       chan error
-	payloadPadding string
+	conn                  *websocket.Conn
+	config                *websocket.Config
+	laddr                 *net.TCPAddr
+	dest                  string
+	origin                string
+	serverType            string
+	serverAdapter         ServerAdapter
+	cmdChan               <-chan int
+	rxErrChan             chan error
+	rttResultChan         chan time.Duration
+	broadcastReceivedChan chan struct{}
+	doneChan              chan error
+	payloadPadding        string
 }
 
 type ServerAdapter interface {
@@ -53,6 +54,7 @@ func NewClient(
 	dest, origin, serverType string,
 	cmdChan <-chan int,
 	rttResultChan chan time.Duration,
+	broadcastReceivedChan chan struct{},
 	doneChan chan error,
 	padding string,
 ) (*Client, error) {
@@ -61,14 +63,15 @@ func NewClient(
 	}
 
 	c := &Client{
-		laddr:          laddr,
-		dest:           dest,
-		origin:         origin,
-		cmdChan:        cmdChan,
-		rxErrChan:      make(chan error),
-		rttResultChan:  rttResultChan,
-		doneChan:       doneChan,
-		payloadPadding: padding,
+		laddr:                 laddr,
+		dest:                  dest,
+		origin:                origin,
+		cmdChan:               cmdChan,
+		rxErrChan:             make(chan error),
+		rttResultChan:         rttResultChan,
+		broadcastReceivedChan: broadcastReceivedChan,
+		doneChan:              doneChan,
+		payloadPadding:        padding,
 	}
 
 	config, err := websocket.NewConfig(dest, origin)
@@ -144,7 +147,7 @@ func (c *Client) Run() {
 			case clientResetCmd:
 				c.conn.Close()
 				<-c.rxErrChan
-				if c2, err := NewClient(c.laddr, c.dest, c.origin, c.serverType, c.cmdChan, c.rttResultChan, c.doneChan, c.payloadPadding); err == nil {
+				if c2, err := NewClient(c.laddr, c.dest, c.origin, c.serverType, c.cmdChan, c.rttResultChan, c.broadcastReceivedChan, c.doneChan, c.payloadPadding); err == nil {
 					go c2.Run()
 				} else {
 					c.doneChan <- err
@@ -182,6 +185,7 @@ func (c *Client) rx() {
 				c.rxErrChan <- fmt.Errorf("received unparsable %s payload: %v", msg.Type, msg.Payload)
 			}
 		case "broadcast":
+			c.broadcastReceivedChan <- struct{}{}
 		default:
 			c.rxErrChan <- fmt.Errorf("received unknown message type: %v", msg.Type)
 		}
