@@ -59,7 +59,9 @@ bidiHandler bc conn = do
         let Just payload = t ^? key "payload"
         case t ^? key "type" . _String of
           Just "echo" -> sendTextData conn (mkPayload "echo" payload)
-          Just "broadcast" -> BC.signal bc (mkPayload "broadcastResult" payload)
+          Just "broadcast" -> do
+            BC.signal bc (mkPayload "broadcast" payload)
+            sendTextData conn (mkPayload "broadcastResult" payload)
           _ -> wtf conn
       _ -> do
         wtf conn
