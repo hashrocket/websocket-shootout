@@ -33,13 +33,11 @@ impl ws::Handler for BenchHandler {
 
     fn on_open(&mut self, _: ws::Handshake) -> ws::Result<()> {
         self.count += 1;
-        println!("Connection Open! {}", self.count);
         Ok(())
     }
 
     fn on_close(&mut self, _: ws::CloseCode, _: &str) {
         self.count -= 1;
-        println!("Connection Closed! {}", self.count);
     }
 }
 
