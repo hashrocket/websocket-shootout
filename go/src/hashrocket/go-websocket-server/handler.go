@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"io"
 	"log"
 	"sync"
@@ -71,15 +72,20 @@ func (h *benchHandler) echo(ws *websocket.Conn, payload interface{}) error {
 func (h *benchHandler) broadcast(ws *websocket.Conn, payload interface{}) error {
 	result := BroadcastResult{Type: "broadcastResult", Payload: payload}
 
-	h.mutex.RLock()
+	msg, err := json.Marshal(&WsMsg{Type: "broadcast", Payload: payload})
+	if err != nil {
+		log.Println("broadcast json marshal err:", err)
+	} else {
 
-	for c, _ := range h.conns {
-		if err := websocket.JSON.Send(c, &WsMsg{Type: "broadcast", Payload: payload}); err == nil {
-			result.ListenerCount += 1
+		h.mutex.RLock()
+
+		for c := range h.conns {
+			if err := websocket.Message.Send(c, string(msg)); err == nil {
+				result.ListenerCount++
+			}
 		}
+		h.mutex.RUnlock()
 	}
-
-	h.mutex.RUnlock()
 
 	return websocket.JSON.Send(ws, &result)
 }
