@@ -16,24 +16,15 @@ struct BenchHandler {
 
 impl ws::Handler for BenchHandler {
     fn on_message(&mut self, msg: ws::Message) -> ws::Result<()> {
-        if let Ok(body) = msg.as_text() {
-            if let Ok(obj) = serde_json::from_str::<Value>(body) {
-                if let Some((msg_type, payload)) = obj.as_object().map(|map| {
-                    (map.get("type").and_then(Value::as_str).unwrap_or(""),
-                     map.get("payload").unwrap_or(NULL_PAYLOAD))
-                }) {
-                    match msg_type {
-                        "echo" => {
-                            try!(self.ws.send(body));
-                        }
-                        "broadcast" => {
-                            try!(self.ws.broadcast(body));
-                            try!(self.ws.send(format!(r#"{{"type":"broadcastResult","listenCount": {}, "payload":{}}}"#,
-                                                          self.count,
-                                                          payload)))
-                        }
-                        _ => {}
-                    }
+        if let Ok(Ok(Value::Object(obj))) = msg.as_text().map(serde_json::from_str::<Value>) {
+            if let Some(&Value::String(ref s)) = obj.get("type") {
+                if s == "echo" {
+                    try!(self.ws.send(msg))
+                } else if s == "broadcast" {
+                    try!(self.ws.broadcast(msg));
+                    try!(self.ws.send(format!(r#"{{"type":"broadcastResult","listenCount": {},"payload":{}}}"#,
+                                              self.count,
+                                              obj.get("payload").unwrap_or(NULL_PAYLOAD))))
                 }
             }
         }
