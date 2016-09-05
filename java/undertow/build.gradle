@@ -1,0 +1,15 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile 'io.undertow:undertow-core:1.2.11.Final'
+    compile 'com.googlecode.json-simple:json-simple:1.1.1'
+}
+
+mainClassName = 'app.WebSocketServer'
+
+defaultTasks 'run'
