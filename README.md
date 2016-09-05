@@ -23,6 +23,15 @@ The following platforms currently have servers implemented.
 * Javascript / NodeJS
 * Ruby / Rails
 
+### Build Instructions
+
+Some dependencies are tracked via git submodules. First step is to pull them down.
+
+```
+git submodule init
+git submodule update
+```
+
 Look for a README.md in each projects directory for instructions on building and running the servers.
 
 ## Benchmark
@@ -42,6 +51,8 @@ clients:  5000    95per-rtt: 184ms    min-rtt:  37ms    median-rtt:  95ms    max
 ```
 
 The above benchmark starts by connecting 1000 websocket clients to ws://earth.local:3334/ws. Then it sends 100 broadcast requests with a concurrency of 10. It increases by 1000 clients at a time until the 95th percentile round-trip time exceeds 250ms.
+
+Run `make` to build the benchmark tool. Ensure you have previously initialized git submodules or the build will fail. The benchmark tool will be built to `bin/websocket-bench`.
 
 ## Open file limits
 
