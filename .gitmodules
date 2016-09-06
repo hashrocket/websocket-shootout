@@ -7,3 +7,6 @@
 [submodule "go/src/github.com/spf13/pflag"]
 	path = go/src/github.com/spf13/pflag
 	url = https://github.com/spf13/pflag.git
+[submodule "go/src/github.com/gorilla/websocket"]
+	path = go/src/github.com/gorilla/websocket
+	url = https://github.com/gorilla/websocket
