@@ -1,4 +1,6 @@
-var WebSocketServer = require('ws').Server;
+'use strict';
+
+var WebSocketServer = require('uws').Server;
 var wss             = new WebSocketServer({ port: 3334 });
 
 function echo(ws, payload) {
