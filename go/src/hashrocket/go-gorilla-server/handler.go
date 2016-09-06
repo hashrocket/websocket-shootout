@@ -62,9 +62,10 @@ func (h *benchHandler) Accept(ws *websocket.Conn) {
 	for {
 		var msg WsMsg
 		err := websocket.ReadJSON(ws, &msg)
-		if err != nil && err.(*websocket.CloseError) != nil && err.(*websocket.CloseError).Code == websocket.CloseAbnormalClosure {
-			return
-		} else if err != nil {
+		if err != nil {
+			if err, ok := err.(*websocket.CloseError); ok && err.Code == websocket.CloseAbnormalClosure {
+				return
+			}
 			log.Println("websocket.ReadJSON err:", err)
 			return
 		}
