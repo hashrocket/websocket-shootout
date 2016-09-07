@@ -1,0 +1,15 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile 'io.netty:netty-codec-http:4.1.5.Final'
+    compile 'com.googlecode.json-simple:json-simple:1.1.1'
+}
+
+mainClassName = 'app.WebSocketServer'
+
+defaultTasks 'run'
