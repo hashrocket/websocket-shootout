@@ -8,11 +8,7 @@ function echo(ws, payload) {
 }
 
 function broadcast(ws, payload) {
-  var msg = JSON.stringify({type: "broadcast", payload: payload});
-  wss.clients.forEach(function each(client) {
-    client.send(msg);
-  });
-
+  wss.broadcast(JSON.stringify({type: "broadcast", payload: payload}));
   ws.send(JSON.stringify({type: "broadcastResult", payload: payload}));
 }
 
