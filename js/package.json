@@ -1,0 +1,12 @@
+{
+  "name": "ws-bench",
+  "version": "1.0.0",
+  "description": "Small websocket servers to be used in benchmarks.",
+  "main": "run-cluster.js",
+  "author": "Jack Christensen & Jonathan Jackson",
+  "license": "MIT",
+  "dependencies": {
+    "uws": "^0.8.0",
+    "ws": "^1.1.1"
+  }
+}
