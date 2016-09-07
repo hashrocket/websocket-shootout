@@ -1,5 +1,8 @@
 # Java - Undertow websocket server implementation
 
+This implementation is a heavily modified version of the [`websockets`
+Undertow example here](https://github.com/undertow-io/undertow/tree/087e8721ee03bf74cfd7f37c0bf874a1519f7608/examples/src/main/java/io/undertow/examples/websockets)
+
 ## Prerequisites
 
 - JDK 8
