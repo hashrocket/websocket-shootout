@@ -24,6 +24,16 @@ bin/rust-ws-server : rust/target/release/rust-ws-server
 rust/target/release/rust-ws-server : rust/src/*
 	cd rust && cargo build --release
 
+bin/hs-websocket-server:
+	cd haskell && stack install
+	cd haskell && cp `stack path --dist-dir`/build/hs-websocket-server/hs-websocket-server ../bin/
+
+bench:
+	bin/websocket-bench broadcast ws://127.0.0.1:3000/ws --concurrent 10 --sample-size 100 --step-size 1000 --limit-percentile 95 --limit-rtt 250ms
+
+gentle-bench:
+	bin/websocket-bench broadcast ws://127.0.0.1:3000/ws --concurrent 10 --sample-size 100 --step-size 100 --limit-percentile 95 --limit-rtt 250ms
+
 .PHONY : clean
 clean :
 	rm -f bin/*
