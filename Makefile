@@ -1,7 +1,7 @@
 GOPATH=$(CURDIR)/go
 
 .PHONY : all
-all : bin/go-websocket-server bin/websocket-bench bin/cpp-websocket-server bin/rust-ws-server
+all : bin/go-websocket-server bin/websocket-bench bin/cpp-websocket-server bin/rust-ws-server bin/haskell-warp-ws-server
 
 bin/go-websocket-server : $(GOPATH)/bin/go-websocket-server
 	cp $< $@
@@ -24,8 +24,12 @@ bin/rust-ws-server : rust/target/release/rust-ws-server
 rust/target/release/rust-ws-server : rust/src/*
 	cd rust && cargo build --release
 
+bin/haskell-warp-ws-server : haskell/warp/Main.hs
+	cd haskell/warp && stack install --local-bin-path $(CURDIR)/bin
+
 .PHONY : clean
 clean :
 	rm -f bin/*
 	rm -f $(GOPATH)/bin/*
 	rm -rf rust/target/*
+	rm -rf haskell/warp/dist
