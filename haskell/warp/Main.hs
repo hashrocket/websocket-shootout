@@ -1,8 +1,7 @@
 {-# LANGUAGE NoImplicitPrelude, OverloadedStrings, ScopedTypeVariables #-}
-module Main where
+module Main (main) where
 
 import ClassyPrelude
-import Data.HashMap.Strict (insert)
 import Network.HTTP.Types (status400)
 import Network.Wai (Application, responseLBS)
 import Network.Wai.Handler.Warp (run)
@@ -24,7 +23,7 @@ parseMsg msg = do
     "echo" -> Just Echo
 
     "broadcast" -> let
-      res = Aeson.encode (insert "type" "broadcastResult" obj)
+      res = Aeson.encode (insertMap "type" "broadcastResult" obj)
       in Just (Broadcast res)
 
     _ -> Nothing

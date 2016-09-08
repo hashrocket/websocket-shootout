@@ -21,7 +21,6 @@ executable haskell-warp-ws-server
                        classy-prelude,
                        http-types,
                        unagi-chan,
-                       unordered-containers,
                        wai,
                        wai-websockets,
                        warp,
