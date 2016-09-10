@@ -19,7 +19,7 @@ sudo apt install libtclap-dev
 uWebSockets needs to be built. First install its dependencies:
 
 ```
-sudo apt install build-essential cmake
+sudo apt install build-essential cmake libuv1-dev
 ```
 
 Then:
