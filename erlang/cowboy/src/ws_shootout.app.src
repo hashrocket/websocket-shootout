@@ -1,0 +1,14 @@
+{application, ws_shootout,
+ [
+  {description, ""},
+  {vsn, "0.0.1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib,
+                  lager,
+                  deliverly
+                 ]},
+  {mod, { ws_shootout_app, []}},
+  {env, []}
+ ]}.

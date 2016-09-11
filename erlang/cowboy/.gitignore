@@ -1,0 +1,39 @@
+*~
+*.DS_Store
+*.log
+*.cookie
+/log
+*~
+
+# XCode noise
+*.swp
+*~.nib
+/build
+*.pbxuser
+*.perspective
+*.perspectivev3
+*.mode1v3
+*.mode2v3
+
+# Sublime
+*.sublime-project
+*.sublime-workspace
+
+# IDEA files
+.idea/*
+*.iml
+out
+# erlang binaries and release
+
+deps
+/
+ebin/
+*.beam
+.eunit
+*.dump
+
+# other files
+files/vm.args
+
+_build/
+*.crashdump
