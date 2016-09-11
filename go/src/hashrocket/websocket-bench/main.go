@@ -82,6 +82,7 @@ func Stress(cmd *cobra.Command, args []string) {
 	localAddrs := parseTCPAddrs(options.localAddrs)
 	cmdChan := make(chan int)
 	rttResultChan := make(chan time.Duration)
+	bcReceivedChan := make(chan struct{})
 	doneChan := make(chan error)
 
 	payloadPadding := strings.Repeat("1234567890", options.payloadPaddingSize/10+1)
@@ -89,7 +90,7 @@ func Stress(cmd *cobra.Command, args []string) {
 
 	clientCount := 0
 	for {
-		if err := startClients(options.serverType, options.stepSize, localAddrs, cmdChan, rttResultChan, doneChan, payloadPadding); err != nil {
+		if err := startClients(options.serverType, options.stepSize, localAddrs, cmdChan, rttResultChan, bcReceivedChan, doneChan, payloadPadding); err != nil {
 			log.Fatal(err)
 		}
 		clientCount += options.stepSize
@@ -100,29 +101,48 @@ func Stress(cmd *cobra.Command, args []string) {
 			inProgress += 1
 		}
 
+		expectedBcs := options.concurrent * clientCount
+		receivedBcs := 0
+
+		timeout := false
+
 		var rttAgg rttAggregate
-		for rttAgg.Count() < options.sampleSize {
+		for !timeout {
 			select {
 			case result := <-rttResultChan:
-				rttAgg.Add(result)
-				inProgress -= 1
+				if rttAgg.Count() < options.sampleSize {
+					rttAgg.Add(result)
+					inProgress -= 1
+				}
+			case <-bcReceivedChan:
+				receivedBcs += 1
 			case err := <-doneChan:
 				fmt.Println("doneChan err:", err)
 				clientCount--
+			case <-time.After(1 * time.Second):
+				timeout = true
 			}
 
 			if rttAgg.Count()+inProgress < options.sampleSize {
 				cmdChan <- clientCmd
 				inProgress += 1
+				expectedBcs += clientCount
 			}
+		}
+
+		if rttAgg.Count() == 0 {
+			fmt.Printf("No replies received!\n")
+			continue
 		}
 
 		if options.limitRTT < rttAgg.Percentile(options.limitPercentile) {
 			return
 		}
 
-		fmt.Printf("clients: %5d    %dper-rtt: %3dms    min-rtt: %3dms    median-rtt: %3dms    max-rtt: %3dms\n",
+		fmt.Printf("clients: %5d  expected: %5d  rcvd: %5d  %dper-rtt: %3dms  min-rtt: %3dms  median-rtt: %3dms  max-rtt: %3dms\n",
 			clientCount,
+			expectedBcs,
+			receivedBcs,
 			options.limitPercentile,
 			roundToMS(rttAgg.Percentile(options.limitPercentile)),
 			roundToMS(rttAgg.Min()),
@@ -135,10 +155,10 @@ func roundToMS(d time.Duration) int64 {
 	return int64((d + (500 * time.Microsecond)) / time.Millisecond)
 }
 
-func startClients(serverType string, count int, localAddrs []*net.TCPAddr, cmdChan <-chan int, rttResultChan chan time.Duration, doneChan chan error, padding string) error {
+func startClients(serverType string, count int, localAddrs []*net.TCPAddr, cmdChan <-chan int, rttResultChan chan time.Duration, bcReceivedChan chan struct{}, doneChan chan error, padding string) error {
 	for i := 0; i < count; i++ {
 		laddr := localAddrs[i%len(localAddrs)]
-		c, err := NewClient(laddr, options.websocketURL, options.websocketOrigin, serverType, cmdChan, rttResultChan, doneChan, padding)
+		c, err := NewClient(laddr, options.websocketURL, options.websocketOrigin, serverType, cmdChan, rttResultChan, bcReceivedChan, doneChan, padding)
 		if err != nil {
 			return err
 		}
