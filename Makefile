@@ -12,8 +12,8 @@ bin/websocket-bench : $(GOPATH)/bin/websocket-bench
 $(GOPATH)/bin/go-websocket-server : $(GOPATH)/src/hashrocket/go-websocket-server/*.go
 	cd go/src/hashrocket/go-websocket-server && go install
 
-$(GOPATH)/bin/websocket-bench : $(GOPATH)/src/hashrocket/websocket-bench/*.go
-	cd go/src/hashrocket/websocket-bench && go install
+$(GOPATH)/bin/websocket-bench : $(GOPATH)/src/hashrocket/websocket-bench/benchmark/*.go $(GOPATH)/src/hashrocket/websocket-bench/cmd/websocket-bench/*.go
+	cd go/src/hashrocket/websocket-bench/cmd/websocket-bench && go install
 
 bin/cpp-websocket-server : cpp/src/*
 	g++ -std=c++14 -I cpp/vendor/jsoncpp/include cpp/src/*.cpp cpp/vendor/jsoncpp/src/jsoncpp.cpp -lboost_system -lboost_thread -O2 -o bin/cpp-websocket-server

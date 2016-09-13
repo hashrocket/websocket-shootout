@@ -1,4 +1,4 @@
-package main
+package benchmark
 
 import (
 	"fmt"
@@ -19,6 +19,10 @@ type ResultRecorder interface {
 
 type TextResultRecorder struct {
 	w io.Writer
+}
+
+func NewTextResultRecorder(w io.Writer) *TextResultRecorder {
+	return &TextResultRecorder{w: w}
 }
 
 func (trr *TextResultRecorder) Record(

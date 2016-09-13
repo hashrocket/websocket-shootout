@@ -1,4 +1,4 @@
-package main
+package benchmark
 
 import (
 	"fmt"
@@ -10,9 +10,9 @@ import (
 )
 
 const (
-	clientEchoCmd = iota
-	clientBroadcastCmd
-	clientResetCmd
+	ClientEchoCmd = iota
+	ClientBroadcastCmd
+	ClientResetCmd
 )
 
 type Client struct {
@@ -52,6 +52,10 @@ type clientFactory struct {
 	laddr *net.TCPAddr
 }
 
+func NewClientFactory(laddr *net.TCPAddr) *clientFactory {
+	return &clientFactory{laddr: laddr}
+}
+
 func (cf *clientFactory) New(
 	dest, origin, serverType string,
 	cmdChan <-chan int,
@@ -65,6 +69,33 @@ func (cf *clientFactory) New(
 	}
 
 	go c.Run()
+	return nil
+}
+
+type remoteClientFactory struct {
+	conn net.Conn
+}
+
+func NewRemoteClientFactory(addr string) (*remoteClientFactory, error) {
+	rcf := &remoteClientFactory{}
+	var err error
+	rcf.conn, err = net.Dial("tcp", addr)
+	if err != nil {
+		return nil, err
+	}
+
+	return rcf, nil
+}
+
+func (rcf *remoteClientFactory) New(
+	dest, origin, serverType string,
+	cmdChan <-chan int,
+	rttResultChan chan time.Duration,
+	doneChan chan error,
+	padding string,
+) error {
+
+	println("stub establish new remote client")
 	return nil
 }
 
@@ -153,15 +184,15 @@ func (c *Client) Run() {
 		select {
 		case cmd := <-c.cmdChan:
 			switch cmd {
-			case clientEchoCmd:
+			case ClientEchoCmd:
 				if err := c.serverAdapter.SendEcho(&Payload{SendTime: strconv.FormatInt(time.Now().UnixNano(), 10), Padding: c.payloadPadding}); err != nil {
 					panic("SendEcho fail")
 				}
-			case clientBroadcastCmd:
+			case ClientBroadcastCmd:
 				if err := c.serverAdapter.SendBroadcast(&Payload{SendTime: strconv.FormatInt(time.Now().UnixNano(), 10), Padding: c.payloadPadding}); err != nil {
 					panic("SendBroadcast fail")
 				}
-			case clientResetCmd:
+			case ClientResetCmd:
 				c.conn.Close()
 				<-c.rxErrChan
 				if c2, err := NewClient(c.laddr, c.dest, c.origin, c.serverType, c.cmdChan, c.rttResultChan, c.doneChan, c.payloadPadding); err == nil {

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
+	"hashrocket/websocket-bench/benchmark"
 )
 
 var options struct {
@@ -19,14 +20,14 @@ var options struct {
 	limitRTT           time.Duration
 	payloadPaddingSize int
 	localAddrs         []string
+	workerListenAddr   string
+	workerListenPort   int
+	workerAddrs        []string
 }
 
 func main() {
 
 	rootCmd := &cobra.Command{Use: "websocket-bench", Short: "websocket benchmark tool"}
-	rootCmd.PersistentFlags().StringVarP(&options.websocketOrigin, "origin", "o", "", "websocket origin")
-	rootCmd.PersistentFlags().StringSliceVarP(&options.localAddrs, "local-addr", "l", []string{}, "local IP address to connect from")
-	rootCmd.PersistentFlags().StringVarP(&options.serverType, "server-type", "", "standard", "server type to connect to (standard, actioncable, phoenix)")
 
 	cmdEcho := &cobra.Command{
 		Use:   "echo URL",
@@ -34,6 +35,10 @@ func main() {
 		Long:  "Stress test 1 to 1 performance with an echo test",
 		Run:   Stress,
 	}
+	cmdEcho.PersistentFlags().StringVarP(&options.websocketOrigin, "origin", "o", "", "websocket origin")
+	cmdEcho.PersistentFlags().StringSliceVarP(&options.localAddrs, "local-addr", "l", []string{}, "local IP address to connect from")
+	cmdEcho.PersistentFlags().StringVarP(&options.serverType, "server-type", "", "standard", "server type to connect to (standard, actioncable, phoenix)")
+	cmdEcho.PersistentFlags().StringSliceVarP(&options.workerAddrs, "worker-addr", "w", []string{}, "worker address to distribute connections to")
 	cmdEcho.Flags().IntVarP(&options.concurrent, "concurrent", "c", 50, "concurrent echo requests")
 	cmdEcho.Flags().IntVarP(&options.sampleSize, "sample-size", "s", 10000, "number of echoes in a sample")
 	cmdEcho.Flags().IntVarP(&options.stepSize, "step-size", "", 5000, "number of clients to increase each step")
@@ -48,6 +53,10 @@ func main() {
 		Long:  "Stress test 1 to many performance with an broadcast test",
 		Run:   Stress,
 	}
+	cmdBroadcast.PersistentFlags().StringVarP(&options.websocketOrigin, "origin", "o", "", "websocket origin")
+	cmdBroadcast.PersistentFlags().StringSliceVarP(&options.localAddrs, "local-addr", "l", []string{}, "local IP address to connect from")
+	cmdBroadcast.PersistentFlags().StringSliceVarP(&options.workerAddrs, "worker-addr", "w", []string{}, "worker address to distribute connections to")
+	cmdBroadcast.PersistentFlags().StringVarP(&options.serverType, "server-type", "", "standard", "server type to connect to (standard, actioncable, phoenix)")
 	cmdBroadcast.Flags().IntVarP(&options.concurrent, "concurrent", "c", 4, "concurrent broadcast requests")
 	cmdBroadcast.Flags().IntVarP(&options.sampleSize, "sample-size", "s", 20, "number of broadcasts in a sample")
 	cmdBroadcast.Flags().IntVarP(&options.stepSize, "step-size", "", 5000, "number of clients to increase each step")
@@ -55,8 +64,6 @@ func main() {
 	cmdBroadcast.Flags().IntVarP(&options.payloadPaddingSize, "payload-padding", "", 0, "payload padding size")
 	cmdBroadcast.Flags().DurationVarP(&options.limitRTT, "limit-rtt", "", time.Millisecond*500, "Max RTT at limit percentile")
 	rootCmd.AddCommand(cmdBroadcast)
-
-	rootCmd.Execute()
 }
 
 func Stress(cmd *cobra.Command, args []string) {
@@ -65,14 +72,15 @@ func Stress(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	config := &BenchmarkConfig{}
+	config := &benchmark.Config{}
 	config.WebsocketURL = args[0]
 	config.WebsocketOrigin = options.websocketOrigin
+	config.ServerType = options.serverType
 	switch cmd.Name() {
 	case "echo":
-		config.ClientCmd = clientEchoCmd
+		config.ClientCmd = benchmark.ClientEchoCmd
 	case "broadcast":
-		config.ClientCmd = clientBroadcastCmd
+		config.ClientCmd = benchmark.ClientBroadcastCmd
 	default:
 		panic("invalid command name")
 	}
@@ -82,13 +90,14 @@ func Stress(cmd *cobra.Command, args []string) {
 	config.SampleSize = options.sampleSize
 	config.LimitPercentile = options.limitPercentile
 	config.LimitRTT = options.limitRTT
-	config.ResultRecorder = &TextResultRecorder{w: os.Stdout}
+	config.ResultRecorder = benchmark.NewTextResultRecorder(os.Stdout)
 
 	localAddrs := parseTCPAddrs(options.localAddrs)
 	for _, a := range localAddrs {
-		config.ClientFactories = append(config.ClientFactories, &clientFactory{laddr: a})
+		config.ClientFactories = append(config.ClientFactories, benchmark.NewClientFactory(a))
 	}
-	b := NewBenchmark(config)
+
+	b := benchmark.NewBenchmark(config)
 	err := b.Run()
 	if err != nil {
 		log.Fatal(err)

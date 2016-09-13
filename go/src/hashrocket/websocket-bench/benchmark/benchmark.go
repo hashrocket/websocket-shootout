@@ -1,4 +1,4 @@
-package main
+package benchmark
 
 import (
 	"strings"
@@ -12,12 +12,13 @@ type Benchmark struct {
 
 	payloadPadding string
 
-	BenchmarkConfig
+	Config
 }
 
-type BenchmarkConfig struct {
+type Config struct {
 	WebsocketURL       string
 	WebsocketOrigin    string
+	ServerType         string
 	ClientCmd          int
 	PayloadPaddingSize int
 	StepSize           int
@@ -39,8 +40,8 @@ type BenchmarkClientFactory interface {
 	) error
 }
 
-func NewBenchmark(config *BenchmarkConfig) *Benchmark {
-	b := &Benchmark{BenchmarkConfig: *config}
+func NewBenchmark(config *Config) *Benchmark {
+	b := &Benchmark{Config: *config}
 
 	b.cmdChan = make(chan int)
 	b.doneChan = make(chan error)
@@ -57,7 +58,7 @@ func NewBenchmark(config *BenchmarkConfig) *Benchmark {
 func (b *Benchmark) Run() error {
 	clientCount := 0
 	for {
-		if err := b.startClients(options.serverType); err != nil {
+		if err := b.startClients(b.ServerType); err != nil {
 			return err
 		}
 		clientCount += b.StepSize
@@ -105,7 +106,7 @@ func (b *Benchmark) Run() error {
 func (b *Benchmark) startClients(serverType string) error {
 	for i := 0; i < b.StepSize; i++ {
 		cf := b.ClientFactories[i%len(b.ClientFactories)]
-		err := cf.New(b.WebsocketURL, b.WebsocketOrigin, serverType, b.cmdChan, b.rttResultChan, b.doneChan, b.payloadPadding)
+		err := cf.New(b.WebsocketURL, b.WebsocketOrigin, b.ServerType, b.cmdChan, b.rttResultChan, b.doneChan, b.payloadPadding)
 		if err != nil {
 			return err
 		}
