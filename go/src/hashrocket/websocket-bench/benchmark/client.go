@@ -12,10 +12,14 @@ import (
 const (
 	ClientEchoCmd = iota
 	ClientBroadcastCmd
-	ClientResetCmd
 )
 
-type Client struct {
+type Client interface {
+	SendEcho(payload *Payload) error
+	SendBroadcast(payload *Payload) error
+}
+
+type localClient struct {
 	conn           *websocket.Conn
 	config         *websocket.Config
 	laddr          *net.TCPAddr
@@ -23,7 +27,6 @@ type Client struct {
 	origin         string
 	serverType     string
 	serverAdapter  ServerAdapter
-	cmdChan        <-chan int
 	rxErrChan      chan error
 	rttResultChan  chan time.Duration
 	doneChan       chan error
@@ -48,74 +51,21 @@ type serverSentMsg struct {
 	ListenerCount int      `json:"listenerCount"`
 }
 
-type clientFactory struct {
-	laddr *net.TCPAddr
-}
-
-func NewClientFactory(laddr *net.TCPAddr) *clientFactory {
-	return &clientFactory{laddr: laddr}
-}
-
-func (cf *clientFactory) New(
-	dest, origin, serverType string,
-	cmdChan <-chan int,
-	rttResultChan chan time.Duration,
-	doneChan chan error,
-	padding string,
-) error {
-	c, err := NewClient(cf.laddr, dest, origin, serverType, cmdChan, rttResultChan, doneChan, padding)
-	if err != nil {
-		return err
-	}
-
-	go c.Run()
-	return nil
-}
-
-type remoteClientFactory struct {
-	conn net.Conn
-}
-
-func NewRemoteClientFactory(addr string) (*remoteClientFactory, error) {
-	rcf := &remoteClientFactory{}
-	var err error
-	rcf.conn, err = net.Dial("tcp", addr)
-	if err != nil {
-		return nil, err
-	}
-
-	return rcf, nil
-}
-
-func (rcf *remoteClientFactory) New(
-	dest, origin, serverType string,
-	cmdChan <-chan int,
-	rttResultChan chan time.Duration,
-	doneChan chan error,
-	padding string,
-) error {
-
-	println("stub establish new remote client")
-	return nil
-}
-
 func NewClient(
 	laddr *net.TCPAddr,
 	dest, origin, serverType string,
-	cmdChan <-chan int,
 	rttResultChan chan time.Duration,
 	doneChan chan error,
 	padding string,
-) (*Client, error) {
+) (Client, error) {
 	if origin == "" {
 		origin = dest
 	}
 
-	c := &Client{
+	c := &localClient{
 		laddr:          laddr,
 		dest:           dest,
 		origin:         origin,
-		cmdChan:        cmdChan,
 		rxErrChan:      make(chan error),
 		rttResultChan:  rttResultChan,
 		doneChan:       doneChan,
@@ -174,48 +124,24 @@ func NewClient(
 		return nil, fmt.Errorf("Unknown server type: %v", serverType)
 	}
 
+	go c.rx()
+
 	return c, nil
 }
 
-func (c *Client) Run() {
-	go c.rx()
-
-	for {
-		select {
-		case cmd := <-c.cmdChan:
-			switch cmd {
-			case ClientEchoCmd:
-				if err := c.serverAdapter.SendEcho(&Payload{SendTime: strconv.FormatInt(time.Now().UnixNano(), 10), Padding: c.payloadPadding}); err != nil {
-					panic("SendEcho fail")
-				}
-			case ClientBroadcastCmd:
-				if err := c.serverAdapter.SendBroadcast(&Payload{SendTime: strconv.FormatInt(time.Now().UnixNano(), 10), Padding: c.payloadPadding}); err != nil {
-					panic("SendBroadcast fail")
-				}
-			case ClientResetCmd:
-				c.conn.Close()
-				<-c.rxErrChan
-				if c2, err := NewClient(c.laddr, c.dest, c.origin, c.serverType, c.cmdChan, c.rttResultChan, c.doneChan, c.payloadPadding); err == nil {
-					go c2.Run()
-				} else {
-					c.doneChan <- err
-				}
-				return
-			default:
-				fmt.Println("cmd:", cmd)
-				panic("unknown cmd")
-			}
-		case err := <-c.rxErrChan:
-			c.doneChan <- err
-			return
-		}
-	}
+func (c *localClient) SendEcho(payload *Payload) error {
+	return c.serverAdapter.SendEcho(&Payload{SendTime: strconv.FormatInt(time.Now().UnixNano(), 10), Padding: c.payloadPadding})
 }
 
-func (c *Client) rx() {
+func (c *localClient) SendBroadcast(payload *Payload) error {
+	return c.serverAdapter.SendBroadcast(&Payload{SendTime: strconv.FormatInt(time.Now().UnixNano(), 10), Padding: c.payloadPadding})
+}
+
+func (c *localClient) rx() {
 	for {
 		msg, err := c.serverAdapter.Receive()
 		if err != nil {
+			panic("todo rxErrChan replacement")
 			c.rxErrChan <- err
 			return
 		}
@@ -227,13 +153,16 @@ func (c *Client) rx() {
 					rtt := time.Duration(time.Now().UnixNano() - int64(sentUnixNanosecond))
 					c.rttResultChan <- rtt
 				} else {
+					panic("todo rxErrChan replacement")
 					c.rxErrChan <- err
 				}
 			} else {
+				panic("todo rxErrChan replacement")
 				c.rxErrChan <- fmt.Errorf("received unparsable %s payload: %v", msg.Type, msg.Payload)
 			}
 		case "broadcast":
 		default:
+			panic("todo rxErrChan replacement")
 			c.rxErrChan <- fmt.Errorf("received unknown message type: %v", msg.Type)
 		}
 	}

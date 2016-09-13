@@ -64,6 +64,18 @@ func main() {
 	cmdBroadcast.Flags().IntVarP(&options.payloadPaddingSize, "payload-padding", "", 0, "payload padding size")
 	cmdBroadcast.Flags().DurationVarP(&options.limitRTT, "limit-rtt", "", time.Millisecond*500, "Max RTT at limit percentile")
 	rootCmd.AddCommand(cmdBroadcast)
+
+	cmdWorker := &cobra.Command{
+		Use:   "worker",
+		Short: "Run in worker mode",
+		Long:  "Listen for commands",
+		Run:   Work,
+	}
+	cmdWorker.Flags().StringVarP(&options.workerListenAddr, "address", "a", "0.0.0.0", "address to listen on")
+	cmdWorker.Flags().IntVarP(&options.workerListenPort, "port", "p", 3000, "port to listen on")
+	rootCmd.AddCommand(cmdWorker)
+
+	rootCmd.Execute()
 }
 
 func Stress(cmd *cobra.Command, args []string) {
@@ -94,11 +106,27 @@ func Stress(cmd *cobra.Command, args []string) {
 
 	localAddrs := parseTCPAddrs(options.localAddrs)
 	for _, a := range localAddrs {
-		config.ClientFactories = append(config.ClientFactories, benchmark.NewClientFactory(a))
+		config.ClientPools = append(config.ClientPools, benchmark.NewLocalClientPool(a))
 	}
 
-	b := benchmark.NewBenchmark(config)
+	for _, a := range options.workerAddrs {
+		rcp, err := benchmark.NewRemoteClientPool(a)
+		if err != nil {
+			log.Fatal(err)
+		}
+		config.ClientPools = append(config.ClientPools, rcp)
+	}
+
+	b := benchmark.New(config)
 	err := b.Run()
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func Work(cmd *cobra.Command, args []string) {
+	worker := benchmark.NewWorker(options.workerListenAddr, uint16(options.workerListenPort))
+	err := worker.Serve()
 	if err != nil {
 		log.Fatal(err)
 	}
