@@ -48,6 +48,26 @@ type serverSentMsg struct {
 	ListenerCount int      `json:"listenerCount"`
 }
 
+type clientFactory struct {
+	laddr *net.TCPAddr
+}
+
+func (cf *clientFactory) New(
+	dest, origin, serverType string,
+	cmdChan <-chan int,
+	rttResultChan chan time.Duration,
+	doneChan chan error,
+	padding string,
+) error {
+	c, err := NewClient(cf.laddr, dest, origin, serverType, cmdChan, rttResultChan, doneChan, padding)
+	if err != nil {
+		return err
+	}
+
+	go c.Run()
+	return nil
+}
+
 func NewClient(
 	laddr *net.TCPAddr,
 	dest, origin, serverType string,

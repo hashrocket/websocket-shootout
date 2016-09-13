@@ -1,18 +1,15 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
 )
 
 var options struct {
-	websocketURL       string
 	websocketOrigin    string
 	serverType         string
 	concurrent         int
@@ -68,84 +65,34 @@ func Stress(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	var clientCmd int
+	config := &BenchmarkConfig{}
+	config.WebsocketURL = args[0]
+	config.WebsocketOrigin = options.websocketOrigin
 	switch cmd.Name() {
 	case "echo":
-		clientCmd = clientEchoCmd
+		config.ClientCmd = clientEchoCmd
 	case "broadcast":
-		clientCmd = clientBroadcastCmd
+		config.ClientCmd = clientBroadcastCmd
 	default:
 		panic("invalid command name")
 	}
+	config.PayloadPaddingSize = options.payloadPaddingSize
+	config.StepSize = options.stepSize
+	config.Concurrent = options.concurrent
+	config.SampleSize = options.sampleSize
+	config.LimitPercentile = options.limitPercentile
+	config.LimitRTT = options.limitRTT
+	config.ResultRecorder = &TextResultRecorder{w: os.Stdout}
 
-	options.websocketURL = args[0]
 	localAddrs := parseTCPAddrs(options.localAddrs)
-	cmdChan := make(chan int)
-	rttResultChan := make(chan time.Duration)
-	doneChan := make(chan error)
-
-	payloadPadding := strings.Repeat("1234567890", options.payloadPaddingSize/10+1)
-	payloadPadding = payloadPadding[:options.payloadPaddingSize]
-
-	clientCount := 0
-	for {
-		if err := startClients(options.serverType, options.stepSize, localAddrs, cmdChan, rttResultChan, doneChan, payloadPadding); err != nil {
-			log.Fatal(err)
-		}
-		clientCount += options.stepSize
-
-		inProgress := 0
-		for i := 0; i < options.concurrent; i++ {
-			cmdChan <- clientCmd
-			inProgress += 1
-		}
-
-		var rttAgg rttAggregate
-		for rttAgg.Count() < options.sampleSize {
-			select {
-			case result := <-rttResultChan:
-				rttAgg.Add(result)
-				inProgress -= 1
-			case err := <-doneChan:
-				fmt.Println("doneChan err:", err)
-				clientCount--
-			}
-
-			if rttAgg.Count()+inProgress < options.sampleSize {
-				cmdChan <- clientCmd
-				inProgress += 1
-			}
-		}
-
-		if options.limitRTT < rttAgg.Percentile(options.limitPercentile) {
-			return
-		}
-
-		fmt.Printf("clients: %5d    %dper-rtt: %3dms    min-rtt: %3dms    median-rtt: %3dms    max-rtt: %3dms\n",
-			clientCount,
-			options.limitPercentile,
-			roundToMS(rttAgg.Percentile(options.limitPercentile)),
-			roundToMS(rttAgg.Min()),
-			roundToMS(rttAgg.Percentile(50)),
-			roundToMS(rttAgg.Max()))
+	for _, a := range localAddrs {
+		config.ClientFactories = append(config.ClientFactories, &clientFactory{laddr: a})
 	}
-}
-
-func roundToMS(d time.Duration) int64 {
-	return int64((d + (500 * time.Microsecond)) / time.Millisecond)
-}
-
-func startClients(serverType string, count int, localAddrs []*net.TCPAddr, cmdChan <-chan int, rttResultChan chan time.Duration, doneChan chan error, padding string) error {
-	for i := 0; i < count; i++ {
-		laddr := localAddrs[i%len(localAddrs)]
-		c, err := NewClient(laddr, options.websocketURL, options.websocketOrigin, serverType, cmdChan, rttResultChan, doneChan, padding)
-		if err != nil {
-			return err
-		}
-		go c.Run()
+	b := NewBenchmark(config)
+	err := b.Run()
+	if err != nil {
+		log.Fatal(err)
 	}
-
-	return nil
 }
 
 func parseTCPAddrs(stringAddrs []string) []*net.TCPAddr {
