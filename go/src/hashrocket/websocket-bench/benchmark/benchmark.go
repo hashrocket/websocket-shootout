@@ -7,7 +7,7 @@ import (
 )
 
 type Benchmark struct {
-	doneChan      chan error
+	errChan       chan error
 	rttResultChan chan time.Duration
 
 	payloadPadding string
@@ -35,7 +35,7 @@ type Config struct {
 func New(config *Config) *Benchmark {
 	b := &Benchmark{Config: *config}
 
-	b.doneChan = make(chan error)
+	b.errChan = make(chan error)
 	b.rttResultChan = make(chan time.Duration)
 
 	b.payloadPadding = strings.Repeat(
@@ -66,7 +66,7 @@ func (b *Benchmark) Run() error {
 			case result := <-b.rttResultChan:
 				rttAgg.Add(result)
 				inProgress -= 1
-			case err := <-b.doneChan:
+			case err := <-b.errChan:
 				return err
 			}
 
@@ -99,7 +99,7 @@ func (b *Benchmark) Run() error {
 func (b *Benchmark) startClients(serverType string) error {
 	for i := 0; i < b.StepSize; i++ {
 		cp := b.ClientPools[i%len(b.ClientPools)]
-		client, err := cp.New(len(b.clients), b.WebsocketURL, b.WebsocketOrigin, b.ServerType, b.rttResultChan, b.doneChan, b.payloadPadding)
+		client, err := cp.New(len(b.clients), b.WebsocketURL, b.WebsocketOrigin, b.ServerType, b.rttResultChan, b.errChan, b.payloadPadding)
 		if err != nil {
 			return err
 		}

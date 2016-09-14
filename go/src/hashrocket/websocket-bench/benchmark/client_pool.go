@@ -12,7 +12,7 @@ type ClientPool interface {
 		id int,
 		dest, origin, serverType string,
 		rttResultChan chan time.Duration,
-		doneChan chan error,
+		errChan chan error,
 		padding string,
 	) (Client, error)
 }
@@ -29,10 +29,10 @@ func (cf *LocalClientPool) New(
 	id int,
 	dest, origin, serverType string,
 	rttResultChan chan time.Duration,
-	doneChan chan error,
+	errChan chan error,
 	padding string,
 ) (Client, error) {
-	c, err := NewClient(cf.laddr, dest, origin, serverType, rttResultChan, doneChan, padding)
+	c, err := NewClient(cf.laddr, dest, origin, serverType, rttResultChan, errChan, padding)
 	if err != nil {
 		return nil, err
 	}
@@ -67,14 +67,14 @@ func (rcp *RemoteClientPool) New(
 	id int,
 	dest, origin, serverType string,
 	rttResultChan chan time.Duration,
-	doneChan chan error,
+	errChan chan error,
 	padding string,
 ) (Client, error) {
 	client := &remoteClient{
 		clientPool:    rcp,
 		id:            id,
 		rttResultChan: rttResultChan,
-		doneChan:      doneChan,
+		errChan:       errChan,
 	}
 	rcp.clients[id] = client
 

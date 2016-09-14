@@ -27,9 +27,8 @@ type localClient struct {
 	origin         string
 	serverType     string
 	serverAdapter  ServerAdapter
-	rxErrChan      chan error
 	rttResultChan  chan<- time.Duration
-	doneChan       chan error
+	errChan        chan<- error
 	payloadPadding string
 }
 
@@ -55,7 +54,7 @@ func NewClient(
 	laddr *net.TCPAddr,
 	dest, origin, serverType string,
 	rttResultChan chan<- time.Duration,
-	doneChan chan error,
+	errChan chan error,
 	padding string,
 ) (Client, error) {
 	if origin == "" {
@@ -66,9 +65,8 @@ func NewClient(
 		laddr:          laddr,
 		dest:           dest,
 		origin:         origin,
-		rxErrChan:      make(chan error),
 		rttResultChan:  rttResultChan,
-		doneChan:       doneChan,
+		errChan:        errChan,
 		payloadPadding: padding,
 	}
 
@@ -141,8 +139,7 @@ func (c *localClient) rx() {
 	for {
 		msg, err := c.serverAdapter.Receive()
 		if err != nil {
-			panic("todo rxErrChan replacement")
-			c.rxErrChan <- err
+			c.errChan <- err
 			return
 		}
 
@@ -153,17 +150,17 @@ func (c *localClient) rx() {
 					rtt := time.Duration(time.Now().UnixNano() - int64(sentUnixNanosecond))
 					c.rttResultChan <- rtt
 				} else {
-					panic("todo rxErrChan replacement")
-					c.rxErrChan <- err
+					c.errChan <- err
+					return
 				}
 			} else {
-				panic("todo rxErrChan replacement")
-				c.rxErrChan <- fmt.Errorf("received unparsable %s payload: %v", msg.Type, msg.Payload)
+				c.errChan <- fmt.Errorf("received unparsable %s payload: %v", msg.Type, msg.Payload)
+				return
 			}
 		case "broadcast":
 		default:
-			panic("todo rxErrChan replacement")
-			c.rxErrChan <- fmt.Errorf("received unknown message type: %v", msg.Type)
+			c.errChan <- fmt.Errorf("received unknown message type: %v", msg.Type)
+			return
 		}
 	}
 }
@@ -173,7 +170,7 @@ type remoteClient struct {
 	id         int
 
 	rttResultChan chan time.Duration
-	doneChan      chan error
+	errChan       chan error
 }
 
 func (c *remoteClient) SendEcho() error {
