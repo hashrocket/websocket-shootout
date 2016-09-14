@@ -32,7 +32,7 @@ func (cf *LocalClientPool) New(
 	errChan chan error,
 	padding string,
 ) (Client, error) {
-	c, err := NewClient(cf.laddr, dest, origin, serverType, rttResultChan, errChan, padding)
+	c, err := newLocalClient(cf.laddr, dest, origin, serverType, rttResultChan, errChan, padding)
 	if err != nil {
 		return nil, err
 	}

@@ -50,13 +50,13 @@ type serverSentMsg struct {
 	ListenerCount int      `json:"listenerCount"`
 }
 
-func NewClient(
+func newLocalClient(
 	laddr *net.TCPAddr,
 	dest, origin, serverType string,
 	rttResultChan chan<- time.Duration,
 	errChan chan error,
 	padding string,
-) (Client, error) {
+) (*localClient, error) {
 	if origin == "" {
 		origin = dest
 	}
