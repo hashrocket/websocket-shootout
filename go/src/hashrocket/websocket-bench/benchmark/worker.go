@@ -67,7 +67,7 @@ func (w *Worker) Serve() error {
 	}
 }
 
-func (wc *workerConn) rx(clientID int, rttResultChan chan time.Duration, doneChan chan error) {
+func (wc *workerConn) rx(clientID int, rttResultChan chan time.Duration, errChan chan error) {
 
 	encoder := json.NewEncoder(wc.conn)
 
@@ -84,7 +84,7 @@ func (wc *workerConn) rx(clientID int, rttResultChan chan time.Duration, doneCha
 			if err != nil {
 				return
 			}
-		case err := <-doneChan:
+		case err := <-errChan:
 			log.Println(err)
 		}
 	}
@@ -107,15 +107,15 @@ func (wc *workerConn) work() {
 		case "connect":
 			cp := wc.clientPools[len(wc.clients)%len(wc.clientPools)]
 			rttResultChan := make(chan time.Duration)
-			doneChan := make(chan error)
+			errChan := make(chan error)
 
-			c, err := cp.New(msg.ClientID, msg.Connect.Dest, msg.Connect.Origin, msg.Connect.ServerType, rttResultChan, doneChan, msg.Connect.Padding)
+			c, err := cp.New(msg.ClientID, msg.Connect.Dest, msg.Connect.Origin, msg.Connect.ServerType, rttResultChan, errChan, msg.Connect.Padding)
 			if err != nil {
 				log.Println(err)
 				return
 			}
 			wc.clients[msg.ClientID] = c
-			go wc.rx(msg.ClientID, rttResultChan, doneChan)
+			go wc.rx(msg.ClientID, rttResultChan, errChan)
 		case "echo":
 			wc.clients[msg.ClientID].SendEcho()
 		case "broadcast":
