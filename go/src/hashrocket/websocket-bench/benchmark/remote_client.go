@@ -8,44 +8,19 @@ import (
 	"time"
 )
 
-type ClientPool interface {
-	New(
-		id int,
-		dest, origin, serverType string,
-		rttResultChan chan time.Duration,
-		errChan chan error,
-		padding string,
-	) (Client, error)
-}
-
-type LocalClientPool struct {
-	laddr *net.TCPAddr
-}
-
-func NewLocalClientPool(laddr *net.TCPAddr) *LocalClientPool {
-	return &LocalClientPool{laddr: laddr}
-}
-
-func (cf *LocalClientPool) New(
-	id int,
-	dest, origin, serverType string,
-	rttResultChan chan time.Duration,
-	errChan chan error,
-	padding string,
-) (Client, error) {
-	c, err := newLocalClient(cf.laddr, dest, origin, serverType, rttResultChan, errChan, padding)
-	if err != nil {
-		return nil, err
-	}
-
-	return c, nil
-}
-
 type RemoteClientPool struct {
 	conn    net.Conn
 	encoder *json.Encoder
 
 	clients map[int]*remoteClient
+}
+
+type remoteClient struct {
+	clientPool *RemoteClientPool
+	id         int
+
+	rttResultChan chan time.Duration
+	errChan       chan error
 }
 
 func NewRemoteClientPool(addr string) (*RemoteClientPool, error) {
@@ -119,4 +94,22 @@ func (rcp *RemoteClientPool) rx() {
 		}
 
 	}
+}
+
+func (c *remoteClient) SendEcho() error {
+	msg := WorkerMsg{
+		ClientID: c.id,
+		Type:     "echo",
+	}
+
+	return c.clientPool.encoder.Encode(msg)
+}
+
+func (c *remoteClient) SendBroadcast() error {
+	msg := WorkerMsg{
+		ClientID: c.id,
+		Type:     "broadcast",
+	}
+
+	return c.clientPool.encoder.Encode(msg)
 }
