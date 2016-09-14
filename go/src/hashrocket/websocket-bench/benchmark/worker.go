@@ -13,6 +13,7 @@ type WorkerMsg struct {
 	Type      string              `json:"type"`
 	Connect   *WorkerConnectMsg   `json:"connect,omitempty"`
 	RTTResult *WorkerRTTResultMsg `json:"rttResult,omitempty"`
+	Error     *WorkerErrorMsg     `json:"error,omitempty"`
 }
 
 type WorkerConnectMsg struct {
@@ -24,6 +25,10 @@ type WorkerConnectMsg struct {
 
 type WorkerRTTResultMsg struct {
 	Duration time.Duration
+}
+
+type WorkerErrorMsg struct {
+	Msg string
 }
 
 type Worker struct {
@@ -80,12 +85,21 @@ func (wc *workerConn) rx(clientID int, rttResultChan chan time.Duration, errChan
 				RTTResult: &WorkerRTTResultMsg{Duration: result},
 			}
 
-			err := encoder.Encode(msg)
-			if err != nil {
-				return
+			if err := encoder.Encode(msg); err != nil {
+				log.Fatalln(err)
 			}
 		case err := <-errChan:
-			log.Println(err)
+			msg := WorkerMsg{
+				ClientID: clientID,
+				Type:     "error",
+				Error:    &WorkerErrorMsg{Msg: err.Error()},
+			}
+
+			if err := encoder.Encode(msg); err != nil {
+				log.Fatalln(err)
+			}
+
+			return
 		}
 	}
 }

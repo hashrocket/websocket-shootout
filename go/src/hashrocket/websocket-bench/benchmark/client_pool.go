@@ -2,6 +2,7 @@ package benchmark
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net"
 	"time"
@@ -111,6 +112,8 @@ func (rcp *RemoteClientPool) rx() {
 		switch msg.Type {
 		case "rttResult":
 			rcp.clients[msg.ClientID].rttResultChan <- msg.RTTResult.Duration
+		case "error":
+			rcp.clients[msg.ClientID].errChan <- errors.New(msg.Error.Msg)
 		default:
 			log.Println("unknown message:", msg.Type)
 		}
