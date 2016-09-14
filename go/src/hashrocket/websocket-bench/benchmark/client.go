@@ -28,7 +28,7 @@ type localClient struct {
 	serverType     string
 	serverAdapter  ServerAdapter
 	rxErrChan      chan error
-	rttResultChan  chan time.Duration
+	rttResultChan  chan<- time.Duration
 	doneChan       chan error
 	payloadPadding string
 }
@@ -54,7 +54,7 @@ type serverSentMsg struct {
 func NewClient(
 	laddr *net.TCPAddr,
 	dest, origin, serverType string,
-	rttResultChan chan time.Duration,
+	rttResultChan chan<- time.Duration,
 	doneChan chan error,
 	padding string,
 ) (Client, error) {
