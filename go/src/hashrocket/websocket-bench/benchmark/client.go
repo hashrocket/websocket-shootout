@@ -171,6 +171,9 @@ func (c *localClient) rx() {
 type remoteClient struct {
 	clientPool *RemoteClientPool
 	id         int
+
+	rttResultChan chan time.Duration
+	doneChan      chan error
 }
 
 func (c *remoteClient) SendEcho() error {

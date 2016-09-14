@@ -2,6 +2,7 @@ package benchmark
 
 import (
 	"encoding/json"
+	"log"
 	"net"
 	"time"
 )
@@ -42,16 +43,22 @@ func (cf *LocalClientPool) New(
 type RemoteClientPool struct {
 	conn    net.Conn
 	encoder *json.Encoder
+
+	clients map[int]*remoteClient
 }
 
 func NewRemoteClientPool(addr string) (*RemoteClientPool, error) {
 	rcp := &RemoteClientPool{}
+	rcp.clients = make(map[int]*remoteClient)
+
 	var err error
 	rcp.conn, err = net.Dial("tcp", addr)
 	if err != nil {
 		return nil, err
 	}
 	rcp.encoder = json.NewEncoder(rcp.conn)
+
+	go rcp.rx()
 
 	return rcp, nil
 }
@@ -63,7 +70,13 @@ func (rcp *RemoteClientPool) New(
 	doneChan chan error,
 	padding string,
 ) (Client, error) {
-	client := &remoteClient{clientPool: rcp, id: id}
+	client := &remoteClient{
+		clientPool:    rcp,
+		id:            id,
+		rttResultChan: rttResultChan,
+		doneChan:      doneChan,
+	}
+	rcp.clients[id] = client
 
 	msg := WorkerMsg{
 		ClientID: id,
@@ -82,4 +95,25 @@ func (rcp *RemoteClientPool) New(
 	}
 
 	return client, nil
+}
+
+func (rcp *RemoteClientPool) rx() {
+	decoder := json.NewDecoder(rcp.conn)
+
+	for {
+		var msg WorkerMsg
+		err := decoder.Decode(&msg)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		switch msg.Type {
+		case "rttResult":
+			rcp.clients[msg.ClientID].rttResultChan <- msg.RTTResult.Duration
+		default:
+			log.Println("unknown message:", msg.Type)
+		}
+
+	}
 }

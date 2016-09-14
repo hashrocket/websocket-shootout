@@ -9,9 +9,10 @@ import (
 )
 
 type WorkerMsg struct {
-	ClientID int               `json:"clientID"`
-	Type     string            `json:"type"`
-	Connect  *WorkerConnectMsg `json:"connect,omitempty"`
+	ClientID  int                 `json:"clientID"`
+	Type      string              `json:"type"`
+	Connect   *WorkerConnectMsg   `json:"connect,omitempty"`
+	RTTResult *WorkerRTTResultMsg `json:"rttResult,omitempty"`
 }
 
 type WorkerConnectMsg struct {
@@ -21,13 +22,17 @@ type WorkerConnectMsg struct {
 	Padding    string
 }
 
+type WorkerRTTResultMsg struct {
+	Duration time.Duration
+}
+
 type Worker struct {
 	listener net.Listener
 	laddr    string
+}
 
-	doneChan      chan error
-	rttResultChan chan time.Duration
-
+type workerConn struct {
+	conn        net.Conn
 	clientPools []ClientPool
 	clients     map[int]Client
 }
@@ -35,12 +40,6 @@ type Worker struct {
 func NewWorker(addr string, port uint16) *Worker {
 	w := &Worker{}
 	w.laddr = net.JoinHostPort(addr, strconv.FormatInt(int64(port), 10))
-
-	w.doneChan = make(chan error)
-	w.rttResultChan = make(chan time.Duration)
-
-	w.clientPools = append(w.clientPools, NewLocalClientPool(nil))
-	w.clients = make(map[int]Client)
 
 	return w
 }
@@ -52,33 +51,49 @@ func (w *Worker) Serve() error {
 	}
 	defer listener.Close()
 
-	go w.rx()
-
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
 			return err
 		}
 
-		go w.work(conn)
+		wc := &workerConn{
+			conn:        conn,
+			clientPools: []ClientPool{NewLocalClientPool(nil)},
+			clients:     make(map[int]Client),
+		}
+
+		go wc.work()
 	}
 }
 
-func (w *Worker) rx() {
+func (wc *workerConn) rx(clientID int, rttResultChan chan time.Duration, doneChan chan error) {
+
+	encoder := json.NewEncoder(wc.conn)
+
 	for {
 		select {
-		case result := <-w.rttResultChan:
-			println("result", result)
-		case err := <-w.doneChan:
-			println("err", err)
+		case result := <-rttResultChan:
+			msg := WorkerMsg{
+				ClientID:  clientID,
+				Type:      "rttResult",
+				RTTResult: &WorkerRTTResultMsg{Duration: result},
+			}
+
+			err := encoder.Encode(msg)
+			if err != nil {
+				return
+			}
+		case err := <-doneChan:
+			log.Println(err)
 		}
 	}
 }
 
-func (w *Worker) work(conn net.Conn) {
-	defer conn.Close()
+func (wc *workerConn) work() {
+	defer wc.conn.Close()
 
-	decoder := json.NewDecoder(conn)
+	decoder := json.NewDecoder(wc.conn)
 
 	for {
 		var msg WorkerMsg
@@ -90,20 +105,21 @@ func (w *Worker) work(conn net.Conn) {
 
 		switch msg.Type {
 		case "connect":
-			cp := w.clientPools[len(w.clients)%len(w.clientPools)]
-			c, err := cp.New(msg.ClientID, msg.Connect.Dest, msg.Connect.Origin, msg.Connect.ServerType, w.rttResultChan, w.doneChan, msg.Connect.Padding)
+			cp := wc.clientPools[len(wc.clients)%len(wc.clientPools)]
+			rttResultChan := make(chan time.Duration)
+			doneChan := make(chan error)
+
+			c, err := cp.New(msg.ClientID, msg.Connect.Dest, msg.Connect.Origin, msg.Connect.ServerType, rttResultChan, doneChan, msg.Connect.Padding)
 			if err != nil {
 				log.Println(err)
 				return
 			}
-			w.clients[msg.ClientID] = c
-			log.Println("connect:", msg.ClientID)
+			wc.clients[msg.ClientID] = c
+			go wc.rx(msg.ClientID, rttResultChan, doneChan)
 		case "echo":
-			log.Println("echo:", msg.ClientID)
-			w.clients[msg.ClientID].SendEcho()
+			wc.clients[msg.ClientID].SendEcho()
 		case "broadcast":
-			log.Println("broadcast:", msg.ClientID)
-			w.clients[msg.ClientID].SendBroadcast()
+			wc.clients[msg.ClientID].SendBroadcast()
 		default:
 			log.Println("unknown message:", msg.Type)
 		}
