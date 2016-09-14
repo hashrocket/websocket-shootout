@@ -15,8 +15,8 @@ const (
 )
 
 type Client interface {
-	SendEcho(payload *Payload) error
-	SendBroadcast(payload *Payload) error
+	SendEcho() error
+	SendBroadcast() error
 }
 
 type localClient struct {
@@ -129,11 +129,11 @@ func NewClient(
 	return c, nil
 }
 
-func (c *localClient) SendEcho(payload *Payload) error {
+func (c *localClient) SendEcho() error {
 	return c.serverAdapter.SendEcho(&Payload{SendTime: strconv.FormatInt(time.Now().UnixNano(), 10), Padding: c.payloadPadding})
 }
 
-func (c *localClient) SendBroadcast(payload *Payload) error {
+func (c *localClient) SendBroadcast() error {
 	return c.serverAdapter.SendBroadcast(&Payload{SendTime: strconv.FormatInt(time.Now().UnixNano(), 10), Padding: c.payloadPadding})
 }
 
@@ -166,4 +166,27 @@ func (c *localClient) rx() {
 			c.rxErrChan <- fmt.Errorf("received unknown message type: %v", msg.Type)
 		}
 	}
+}
+
+type remoteClient struct {
+	clientPool *RemoteClientPool
+	id         int
+}
+
+func (c *remoteClient) SendEcho() error {
+	msg := WorkerMsg{
+		ClientID: c.id,
+		Type:     "echo",
+	}
+
+	return c.clientPool.encoder.Encode(msg)
+}
+
+func (c *remoteClient) SendBroadcast() error {
+	msg := WorkerMsg{
+		ClientID: c.id,
+		Type:     "broadcast",
+	}
+
+	return c.clientPool.encoder.Encode(msg)
 }

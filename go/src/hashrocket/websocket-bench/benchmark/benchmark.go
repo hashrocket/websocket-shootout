@@ -2,7 +2,6 @@ package benchmark
 
 import (
 	"math/rand"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -48,12 +47,10 @@ func New(config *Config) *Benchmark {
 }
 
 func (b *Benchmark) Run() error {
-	clientCount := 0
 	for {
 		if err := b.startClients(b.ServerType); err != nil {
 			return err
 		}
-		clientCount += b.StepSize
 
 		inProgress := 0
 		for i := 0; i < b.Concurrent; i++ {
@@ -86,7 +83,7 @@ func (b *Benchmark) Run() error {
 		}
 
 		err := b.ResultRecorder.Record(
-			clientCount,
+			len(b.clients),
 			b.LimitPercentile,
 			rttAgg.Percentile(b.LimitPercentile),
 			rttAgg.Min(),
@@ -102,7 +99,7 @@ func (b *Benchmark) Run() error {
 func (b *Benchmark) startClients(serverType string) error {
 	for i := 0; i < b.StepSize; i++ {
 		cp := b.ClientPools[i%len(b.ClientPools)]
-		client, err := cp.New(b.WebsocketURL, b.WebsocketOrigin, b.ServerType, b.rttResultChan, b.doneChan, b.payloadPadding)
+		client, err := cp.New(len(b.clients), b.WebsocketURL, b.WebsocketOrigin, b.ServerType, b.rttResultChan, b.doneChan, b.payloadPadding)
 		if err != nil {
 			return err
 		}
@@ -126,14 +123,13 @@ func (b *Benchmark) sendToRandomClient() error {
 	}
 
 	client := b.randomClient()
-	payload := &Payload{SendTime: strconv.FormatInt(time.Now().UnixNano(), 10), Padding: b.payloadPadding}
 	switch b.ClientCmd {
 	case ClientEchoCmd:
-		if err := client.SendEcho(payload); err != nil {
+		if err := client.SendEcho(); err != nil {
 			return err
 		}
 	case ClientBroadcastCmd:
-		if err := client.SendBroadcast(payload); err != nil {
+		if err := client.SendBroadcast(); err != nil {
 			return err
 		}
 	default:

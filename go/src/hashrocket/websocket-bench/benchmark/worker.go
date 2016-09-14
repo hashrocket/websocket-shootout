@@ -9,9 +9,9 @@ import (
 )
 
 type WorkerMsg struct {
-	Ref     string            `json:"ref"`
-	Type    string            `json:"type"`
-	Connect *WorkerConnectMsg `json:"connect,omitempty"`
+	ClientID int               `json:"clientID"`
+	Type     string            `json:"type"`
+	Connect  *WorkerConnectMsg `json:"connect,omitempty"`
 }
 
 type WorkerConnectMsg struct {
@@ -29,6 +29,7 @@ type Worker struct {
 	rttResultChan chan time.Duration
 
 	clientPools []ClientPool
+	clients     map[int]Client
 }
 
 func NewWorker(addr string, port uint16) *Worker {
@@ -39,6 +40,7 @@ func NewWorker(addr string, port uint16) *Worker {
 	w.rttResultChan = make(chan time.Duration)
 
 	w.clientPools = append(w.clientPools, NewLocalClientPool(nil))
+	w.clients = make(map[int]Client)
 
 	return w
 }
@@ -50,6 +52,8 @@ func (w *Worker) Serve() error {
 	}
 	defer listener.Close()
 
+	go w.rx()
+
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
@@ -60,11 +64,21 @@ func (w *Worker) Serve() error {
 	}
 }
 
+func (w *Worker) rx() {
+	for {
+		select {
+		case result := <-w.rttResultChan:
+			println("result", result)
+		case err := <-w.doneChan:
+			println("err", err)
+		}
+	}
+}
+
 func (w *Worker) work(conn net.Conn) {
 	defer conn.Close()
 
 	decoder := json.NewDecoder(conn)
-	clientCount := 0
 
 	for {
 		var msg WorkerMsg
@@ -76,13 +90,20 @@ func (w *Worker) work(conn net.Conn) {
 
 		switch msg.Type {
 		case "connect":
-			cp := w.clientPools[clientCount%len(w.clientPools)]
-			clientCount++
-			_, err := cp.New(msg.Connect.Dest, msg.Connect.Origin, msg.Connect.ServerType, w.rttResultChan, w.doneChan, msg.Connect.Padding)
+			cp := w.clientPools[len(w.clients)%len(w.clientPools)]
+			c, err := cp.New(msg.ClientID, msg.Connect.Dest, msg.Connect.Origin, msg.Connect.ServerType, w.rttResultChan, w.doneChan, msg.Connect.Padding)
 			if err != nil {
 				log.Println(err)
 				return
 			}
+			w.clients[msg.ClientID] = c
+			log.Println("connect:", msg.ClientID)
+		case "echo":
+			log.Println("echo:", msg.ClientID)
+			w.clients[msg.ClientID].SendEcho()
+		case "broadcast":
+			log.Println("broadcast:", msg.ClientID)
+			w.clients[msg.ClientID].SendBroadcast()
 		default:
 			log.Println("unknown message:", msg.Type)
 		}

@@ -1,12 +1,14 @@
 package benchmark
 
 import (
+	"encoding/json"
 	"net"
 	"time"
 )
 
 type ClientPool interface {
 	New(
+		id int,
 		dest, origin, serverType string,
 		rttResultChan chan time.Duration,
 		doneChan chan error,
@@ -23,6 +25,7 @@ func NewLocalClientPool(laddr *net.TCPAddr) *LocalClientPool {
 }
 
 func (cf *LocalClientPool) New(
+	id int,
 	dest, origin, serverType string,
 	rttResultChan chan time.Duration,
 	doneChan chan error,
@@ -37,7 +40,8 @@ func (cf *LocalClientPool) New(
 }
 
 type RemoteClientPool struct {
-	conn net.Conn
+	conn    net.Conn
+	encoder *json.Encoder
 }
 
 func NewRemoteClientPool(addr string) (*RemoteClientPool, error) {
@@ -47,17 +51,35 @@ func NewRemoteClientPool(addr string) (*RemoteClientPool, error) {
 	if err != nil {
 		return nil, err
 	}
+	rcp.encoder = json.NewEncoder(rcp.conn)
 
 	return rcp, nil
 }
 
 func (rcp *RemoteClientPool) New(
+	id int,
 	dest, origin, serverType string,
 	rttResultChan chan time.Duration,
 	doneChan chan error,
 	padding string,
 ) (Client, error) {
+	client := &remoteClient{clientPool: rcp, id: id}
 
-	println("stub establish new remote client")
-	return nil, nil
+	msg := WorkerMsg{
+		ClientID: id,
+		Type:     "connect",
+	}
+	msg.Connect = &WorkerConnectMsg{
+		Dest:       dest,
+		Origin:     origin,
+		ServerType: serverType,
+		Padding:    padding,
+	}
+
+	err := rcp.encoder.Encode(msg)
+	if err != nil {
+		return nil, err
+	}
+
+	return client, nil
 }
