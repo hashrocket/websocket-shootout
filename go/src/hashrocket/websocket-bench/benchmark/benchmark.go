@@ -1,18 +1,20 @@
 package benchmark
 
 import (
+	"math/rand"
 	"strings"
 	"time"
 )
 
 type Benchmark struct {
-	cmdChan       chan int
-	doneChan      chan error
+	errChan       chan error
 	rttResultChan chan time.Duration
 
 	payloadPadding string
 
 	Config
+
+	clients []Client
 }
 
 type Config struct {
@@ -26,25 +28,14 @@ type Config struct {
 	SampleSize         int
 	LimitPercentile    int
 	LimitRTT           time.Duration
-	ClientFactories    []BenchmarkClientFactory
+	ClientPools        []ClientPool
 	ResultRecorder     ResultRecorder
 }
 
-type BenchmarkClientFactory interface {
-	New(
-		dest, origin, serverType string,
-		cmdChan <-chan int,
-		rttResultChan chan time.Duration,
-		doneChan chan error,
-		padding string,
-	) error
-}
-
-func NewBenchmark(config *Config) *Benchmark {
+func New(config *Config) *Benchmark {
 	b := &Benchmark{Config: *config}
 
-	b.cmdChan = make(chan int)
-	b.doneChan = make(chan error)
+	b.errChan = make(chan error)
 	b.rttResultChan = make(chan time.Duration)
 
 	b.payloadPadding = strings.Repeat(
@@ -56,16 +47,16 @@ func NewBenchmark(config *Config) *Benchmark {
 }
 
 func (b *Benchmark) Run() error {
-	clientCount := 0
 	for {
 		if err := b.startClients(b.ServerType); err != nil {
 			return err
 		}
-		clientCount += b.StepSize
 
 		inProgress := 0
 		for i := 0; i < b.Concurrent; i++ {
-			b.cmdChan <- b.ClientCmd
+			if err := b.sendToRandomClient(); err != nil {
+				return err
+			}
 			inProgress += 1
 		}
 
@@ -75,12 +66,14 @@ func (b *Benchmark) Run() error {
 			case result := <-b.rttResultChan:
 				rttAgg.Add(result)
 				inProgress -= 1
-			case err := <-b.doneChan:
+			case err := <-b.errChan:
 				return err
 			}
 
 			if rttAgg.Count()+inProgress < b.SampleSize {
-				b.cmdChan <- b.ClientCmd
+				if err := b.sendToRandomClient(); err != nil {
+					return err
+				}
 				inProgress += 1
 			}
 		}
@@ -90,7 +83,7 @@ func (b *Benchmark) Run() error {
 		}
 
 		err := b.ResultRecorder.Record(
-			clientCount,
+			len(b.clients),
 			b.LimitPercentile,
 			rttAgg.Percentile(b.LimitPercentile),
 			rttAgg.Min(),
@@ -105,11 +98,42 @@ func (b *Benchmark) Run() error {
 
 func (b *Benchmark) startClients(serverType string) error {
 	for i := 0; i < b.StepSize; i++ {
-		cf := b.ClientFactories[i%len(b.ClientFactories)]
-		err := cf.New(b.WebsocketURL, b.WebsocketOrigin, b.ServerType, b.cmdChan, b.rttResultChan, b.doneChan, b.payloadPadding)
+		cp := b.ClientPools[i%len(b.ClientPools)]
+		client, err := cp.New(len(b.clients), b.WebsocketURL, b.WebsocketOrigin, b.ServerType, b.rttResultChan, b.errChan, b.payloadPadding)
 		if err != nil {
 			return err
 		}
+		b.clients = append(b.clients, client)
+	}
+
+	return nil
+}
+
+func (b *Benchmark) randomClient() Client {
+	if len(b.clients) == 0 {
+		panic("no clients")
+	}
+
+	return b.clients[rand.Intn(len(b.clients))]
+}
+
+func (b *Benchmark) sendToRandomClient() error {
+	if len(b.clients) == 0 {
+		panic("no clients")
+	}
+
+	client := b.randomClient()
+	switch b.ClientCmd {
+	case ClientEchoCmd:
+		if err := client.SendEcho(); err != nil {
+			return err
+		}
+	case ClientBroadcastCmd:
+		if err := client.SendBroadcast(); err != nil {
+			return err
+		}
+	default:
+		panic("unknown client command")
 	}
 
 	return nil
