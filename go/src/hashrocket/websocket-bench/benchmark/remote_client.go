@@ -96,6 +96,10 @@ func (rcp *RemoteClientPool) rx() {
 	}
 }
 
+func (rcp *RemoteClientPool) Close() error {
+	return rcp.conn.Close()
+}
+
 func (c *remoteClient) SendEcho() error {
 	msg := WorkerMsg{
 		ClientID: c.id,

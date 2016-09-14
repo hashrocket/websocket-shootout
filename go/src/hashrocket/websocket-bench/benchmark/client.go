@@ -22,4 +22,5 @@ type ClientPool interface {
 		errChan chan error,
 		padding string,
 	) (Client, error)
+	Close() error
 }

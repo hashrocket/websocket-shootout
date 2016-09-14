@@ -156,24 +156,40 @@ func (c *localClient) rx() {
 }
 
 type LocalClientPool struct {
-	laddr *net.TCPAddr
+	laddr   *net.TCPAddr
+	clients map[int]*localClient
 }
 
 func NewLocalClientPool(laddr *net.TCPAddr) *LocalClientPool {
-	return &LocalClientPool{laddr: laddr}
+	return &LocalClientPool{
+		laddr:   laddr,
+		clients: make(map[int]*localClient),
+	}
 }
 
-func (cf *LocalClientPool) New(
+func (lcp *LocalClientPool) New(
 	id int,
 	dest, origin, serverType string,
 	rttResultChan chan time.Duration,
 	errChan chan error,
 	padding string,
 ) (Client, error) {
-	c, err := newLocalClient(cf.laddr, dest, origin, serverType, rttResultChan, errChan, padding)
+	c, err := newLocalClient(lcp.laddr, dest, origin, serverType, rttResultChan, errChan, padding)
 	if err != nil {
 		return nil, err
 	}
 
+	lcp.clients[id] = c
+
 	return c, nil
+}
+
+func (lcp *LocalClientPool) Close() error {
+	for _, c := range lcp.clients {
+		if err := c.conn.Close(); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

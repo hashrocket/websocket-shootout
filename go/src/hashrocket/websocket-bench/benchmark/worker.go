@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -40,6 +41,9 @@ type workerConn struct {
 	conn        net.Conn
 	clientPools []ClientPool
 	clients     map[int]Client
+
+	closedMutex sync.Mutex
+	closed      bool
 }
 
 func NewWorker(addr string, port uint16) *Worker {
@@ -89,6 +93,13 @@ func (wc *workerConn) rx(clientID int, rttResultChan chan time.Duration, errChan
 				log.Fatalln(err)
 			}
 		case err := <-errChan:
+			wc.closedMutex.Lock()
+			closed := wc.closed
+			wc.closedMutex.Unlock()
+			if closed {
+				return
+			}
+
 			msg := WorkerMsg{
 				ClientID: clientID,
 				Type:     "error",
@@ -103,9 +114,25 @@ func (wc *workerConn) rx(clientID int, rttResultChan chan time.Duration, errChan
 		}
 	}
 }
+func (wc *workerConn) close() {
+	wc.conn.Close()
+
+	wc.closedMutex.Lock()
+	wc.closed = true
+	wc.closedMutex.Unlock()
+
+	for _, cp := range wc.clientPools {
+		err := cp.Close()
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
+}
 
 func (wc *workerConn) work() {
-	defer wc.conn.Close()
+	defer wc.close()
+
+	log.Println(wc.conn.RemoteAddr().String(), "Accepted")
 
 	decoder := json.NewDecoder(wc.conn)
 
@@ -113,7 +140,7 @@ func (wc *workerConn) work() {
 		var msg WorkerMsg
 		err := decoder.Decode(&msg)
 		if err != nil {
-			log.Println(err)
+			log.Println(wc.conn.RemoteAddr().String(), err)
 			return
 		}
 
