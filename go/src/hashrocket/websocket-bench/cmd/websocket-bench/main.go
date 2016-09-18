@@ -24,6 +24,7 @@ var options struct {
 	workerListenAddr   string
 	workerListenPort   int
 	workerAddrs        []string
+	totalSteps         int
 }
 
 func main() {
@@ -46,6 +47,7 @@ func main() {
 	cmdEcho.Flags().IntVarP(&options.limitPercentile, "limit-percentile", "", 95, "round-trip time percentile to for limit")
 	cmdEcho.Flags().IntVarP(&options.payloadPaddingSize, "payload-padding", "", 0, "payload padding size")
 	cmdEcho.Flags().DurationVarP(&options.limitRTT, "limit-rtt", "", time.Millisecond*500, "Max RTT at limit percentile")
+	cmdEcho.Flags().IntVarP(&options.totalSteps, "total-steps", "", 0, "Run benchmark for specified number of steps")
 	rootCmd.AddCommand(cmdEcho)
 
 	cmdBroadcast := &cobra.Command{
@@ -65,6 +67,7 @@ func main() {
 	cmdBroadcast.Flags().IntVarP(&options.limitPercentile, "limit-percentile", "", 95, "round-trip time percentile to for limit")
 	cmdBroadcast.Flags().IntVarP(&options.payloadPaddingSize, "payload-padding", "", 0, "payload padding size")
 	cmdBroadcast.Flags().DurationVarP(&options.limitRTT, "limit-rtt", "", time.Millisecond*500, "Max RTT at limit percentile")
+	cmdBroadcast.Flags().IntVarP(&options.totalSteps, "total-steps", "", 0, "Run benchmark for specified number of steps")
 	rootCmd.AddCommand(cmdBroadcast)
 
 	cmdWorker := &cobra.Command{
@@ -105,6 +108,7 @@ func Stress(cmd *cobra.Command, args []string) {
 	config.InitialClients = options.initialClients
 	config.LimitPercentile = options.limitPercentile
 	config.LimitRTT = options.limitRTT
+	config.TotalSteps = options.totalSteps
 	config.ResultRecorder = benchmark.NewTextResultRecorder(os.Stdout)
 
 	localAddrs := parseTCPAddrs(options.localAddrs)
