@@ -5,7 +5,6 @@
                   [environ "1.1.0"]
                   [compojure "1.5.1"]
                   [cheshire  "5.6.3"]
-                  [ring/ring-defaults "0.2.1"]
                   [http-kit "2.2.0"]])
 
 (task-options!
