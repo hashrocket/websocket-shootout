@@ -1,5 +1,14 @@
 var WebSocketServer = require('ws').Server;
 var wss             = new WebSocketServer({ port: 3334 });
+var cluster         = require('cluster');
+
+if (cluster.isWorker) {
+  process.on('message', function(msg) {
+    wss.clients.forEach(function each(client) {
+      client.send(msg);
+    });
+  });
+}
 
 function echo(ws, payload) {
   ws.send(JSON.stringify({type: "echo", payload: payload}));
@@ -10,6 +19,10 @@ function broadcast(ws, payload) {
   wss.clients.forEach(function each(client) {
     client.send(msg);
   });
+
+  if (cluster.isWorker) {
+    process.send(msg);
+  }
 
   ws.send(JSON.stringify({type: "broadcastResult", payload: payload}));
 }
