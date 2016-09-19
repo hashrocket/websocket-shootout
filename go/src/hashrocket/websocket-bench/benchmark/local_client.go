@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"strconv"
+	"sync"
 	"time"
 
 	"golang.org/x/net/websocket"
@@ -20,6 +21,9 @@ type localClient struct {
 	rttResultChan  chan<- time.Duration
 	errChan        chan<- error
 	payloadPadding string
+
+	rxBroadcastCountLock sync.Mutex
+	rxBroadcastCount     int
 }
 
 type ServerAdapter interface {
@@ -125,6 +129,14 @@ func (c *localClient) SendBroadcast() error {
 	return c.serverAdapter.SendBroadcast(&Payload{SendTime: strconv.FormatInt(time.Now().UnixNano(), 10), Padding: c.payloadPadding})
 }
 
+func (c *localClient) ResetRxBroadcastCount() (int, error) {
+	c.rxBroadcastCountLock.Lock()
+	count := c.rxBroadcastCount
+	c.rxBroadcastCount = 0
+	c.rxBroadcastCountLock.Unlock()
+	return count, nil
+}
+
 func (c *localClient) rx() {
 	for {
 		msg, err := c.serverAdapter.Receive()
@@ -148,6 +160,9 @@ func (c *localClient) rx() {
 				return
 			}
 		case "broadcast":
+			c.rxBroadcastCountLock.Lock()
+			c.rxBroadcastCount++
+			c.rxBroadcastCountLock.Unlock()
 		default:
 			c.errChan <- fmt.Errorf("received unknown message type: %v", msg.Type)
 			return

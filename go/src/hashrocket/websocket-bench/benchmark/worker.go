@@ -10,11 +10,12 @@ import (
 )
 
 type WorkerMsg struct {
-	ClientID  int                 `json:"clientID"`
-	Type      string              `json:"type"`
-	Connect   *WorkerConnectMsg   `json:"connect,omitempty"`
-	RTTResult *WorkerRTTResultMsg `json:"rttResult,omitempty"`
-	Error     *WorkerErrorMsg     `json:"error,omitempty"`
+	ClientID         int                        `json:"clientID"`
+	Type             string                     `json:"type"`
+	Connect          *WorkerConnectMsg          `json:"connect,omitempty"`
+	RTTResult        *WorkerRTTResultMsg        `json:"rttResult,omitempty"`
+	Error            *WorkerErrorMsg            `json:"error,omitempty"`
+	RxBroadcastCount *WorkerRxBroadcastCountMsg `json:"rxBroadcastCount,omitempty"`
 }
 
 type WorkerConnectMsg struct {
@@ -32,6 +33,10 @@ type WorkerErrorMsg struct {
 	Msg string
 }
 
+type WorkerRxBroadcastCountMsg struct {
+	Count int
+}
+
 type Worker struct {
 	listener net.Listener
 	laddr    string
@@ -39,6 +44,7 @@ type Worker struct {
 
 type workerConn struct {
 	conn        net.Conn
+	encoder     *json.Encoder
 	clientPools []ClientPool
 	clients     map[int]Client
 
@@ -68,6 +74,7 @@ func (w *Worker) Serve() error {
 
 		wc := &workerConn{
 			conn:        conn,
+			encoder:     json.NewEncoder(conn),
 			clientPools: []ClientPool{NewLocalClientPool(nil)},
 			clients:     make(map[int]Client),
 		}
@@ -77,9 +84,6 @@ func (w *Worker) Serve() error {
 }
 
 func (wc *workerConn) rx(clientID int, rttResultChan chan time.Duration, errChan chan error) {
-
-	encoder := json.NewEncoder(wc.conn)
-
 	for {
 		select {
 		case result := <-rttResultChan:
@@ -89,7 +93,7 @@ func (wc *workerConn) rx(clientID int, rttResultChan chan time.Duration, errChan
 				RTTResult: &WorkerRTTResultMsg{Duration: result},
 			}
 
-			if err := encoder.Encode(msg); err != nil {
+			if err := wc.encoder.Encode(msg); err != nil {
 				log.Fatalln(err)
 			}
 		case err := <-errChan:
@@ -106,7 +110,7 @@ func (wc *workerConn) rx(clientID int, rttResultChan chan time.Duration, errChan
 				Error:    &WorkerErrorMsg{Msg: err.Error()},
 			}
 
-			if err := encoder.Encode(msg); err != nil {
+			if err := wc.encoder.Encode(msg); err != nil {
 				log.Fatalln(err)
 			}
 
@@ -156,11 +160,34 @@ func (wc *workerConn) work() {
 				return
 			}
 			wc.clients[msg.ClientID] = c
+
+			// Send exact message back as confirmation of connection
+			if err := wc.encoder.Encode(msg); err != nil {
+				log.Fatalln(err)
+			}
+
 			go wc.rx(msg.ClientID, rttResultChan, errChan)
 		case "echo":
 			wc.clients[msg.ClientID].SendEcho()
 		case "broadcast":
 			wc.clients[msg.ClientID].SendBroadcast()
+		case "resetRxBroadcastCount":
+			count, err := wc.clients[msg.ClientID].ResetRxBroadcastCount()
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			encoder := json.NewEncoder(wc.conn)
+			msg := WorkerMsg{
+				ClientID:         msg.ClientID,
+				Type:             "rxBroadcastCount",
+				RxBroadcastCount: &WorkerRxBroadcastCountMsg{Count: count},
+			}
+
+			if err := encoder.Encode(msg); err != nil {
+				log.Fatalln(err)
+			}
+
 		default:
 			log.Println("unknown message:", msg.Type)
 		}

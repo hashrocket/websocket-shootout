@@ -12,6 +12,7 @@ const (
 type Client interface {
 	SendEcho() error
 	SendBroadcast() error
+	ResetRxBroadcastCount() (int, error)
 }
 
 type ClientPool interface {

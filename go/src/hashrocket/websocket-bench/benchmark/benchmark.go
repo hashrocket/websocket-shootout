@@ -1,6 +1,7 @@
 package benchmark
 
 import (
+	"fmt"
 	"math/rand"
 	"strings"
 	"time"
@@ -47,6 +48,8 @@ func New(config *Config) *Benchmark {
 }
 
 func (b *Benchmark) Run() error {
+	var expectedRxBroadcastCount int
+
 	for {
 		if err := b.startClients(b.ServerType); err != nil {
 			return err
@@ -57,7 +60,7 @@ func (b *Benchmark) Run() error {
 			if err := b.sendToRandomClient(); err != nil {
 				return err
 			}
-			inProgress += 1
+			inProgress++
 		}
 
 		var rttAgg rttAggregate
@@ -65,7 +68,7 @@ func (b *Benchmark) Run() error {
 			select {
 			case result := <-b.rttResultChan:
 				rttAgg.Add(result)
-				inProgress -= 1
+				inProgress--
 			case err := <-b.errChan:
 				return err
 			}
@@ -74,11 +77,36 @@ func (b *Benchmark) Run() error {
 				if err := b.sendToRandomClient(); err != nil {
 					return err
 				}
-				inProgress += 1
+				inProgress++
 			}
 		}
 
+		expectedRxBroadcastCount += len(b.clients) * b.SampleSize
+
 		if b.LimitRTT < rttAgg.Percentile(b.LimitPercentile) {
+			if b.ClientCmd == ClientBroadcastCmd {
+				// Due to the async nature of the broadcasts and the receptions, it is
+				// possible for the broadcastResult to arrive before all the
+				// broadcasts. This isn't really a problem when running the benchmark
+				// because the samples are will balance each other out. However, it
+				// does matter when checking at the end that all expected broadcasts
+				// were received. So we wait a little before getting the broadcast
+				// count.
+				time.Sleep(250 * time.Millisecond)
+
+				totalRxBroadcastCount := 0
+				for _, c := range b.clients {
+					count, err := c.ResetRxBroadcastCount()
+					if err != nil {
+						return err
+					}
+					totalRxBroadcastCount += count
+				}
+				if totalRxBroadcastCount != expectedRxBroadcastCount {
+					return fmt.Errorf("Missing received broadcasts: expected %d, got %d", expectedRxBroadcastCount, totalRxBroadcastCount)
+				}
+			}
+
 			return nil
 		}
 
