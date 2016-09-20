@@ -102,8 +102,11 @@ func (b *Benchmark) Run() error {
 					}
 					totalRxBroadcastCount += count
 				}
-				if totalRxBroadcastCount != expectedRxBroadcastCount {
+				if totalRxBroadcastCount < expectedRxBroadcastCount {
 					return fmt.Errorf("Missing received broadcasts: expected %d, got %d", expectedRxBroadcastCount, totalRxBroadcastCount)
+				}
+				if totalRxBroadcastCount > expectedRxBroadcastCount {
+					return fmt.Errorf("Extra received broadcasts: expected %d, got %d", expectedRxBroadcastCount, totalRxBroadcastCount)
 				}
 			}
 
