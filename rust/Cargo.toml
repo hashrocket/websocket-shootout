@@ -4,7 +4,11 @@ version = "0.1.0"
 authors = [""]
 
 [dependencies]
-ws = "0.5.1"
+clap = "2.11"
+mioco = "0.8"
+num_cpus = "1.0"
+scoped-pool = "1.0"
 serde = "0.8"
 serde_json = "0.8"
-clap = "2.11"
+threadpool = "1.0"
+ws = "0.5.1"

@@ -10,3 +10,9 @@
 [submodule "go/src/github.com/gorilla/websocket"]
 	path = go/src/github.com/gorilla/websocket
 	url = https://github.com/gorilla/websocket
+[submodule "cpp/uwebsockets/vendor/rapidjson"]
+	path = cpp/uwebsockets/vendor/rapidjson
+	url = https://github.com/miloyip/rapidjson.git
+[submodule "cpp/uwebsockets/vendor/uWebSockets"]
+	path = cpp/uwebsockets/vendor/uWebSockets
+	url = https://github.com/uWebSockets/uWebSockets.git

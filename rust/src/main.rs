@@ -1,58 +1,23 @@
-extern crate ws;
 extern crate clap;
+extern crate mioco;
+extern crate num_cpus;
+extern crate scoped_pool;
 extern crate serde;
 extern crate serde_json;
+extern crate threadpool;
+extern crate ws;
 
-use serde_json::Value;
+use clap::{App, Arg, ArgGroup};
 
-use clap::{App, Arg};
-
-const NULL_PAYLOAD: &'static Value = &Value::Null;
-
-struct BenchHandler {
-    ws: ws::Sender,
-    count: u32,
-}
-
-impl ws::Handler for BenchHandler {
-    fn on_message(&mut self, msg: ws::Message) -> ws::Result<()> {
-        if let Ok(body) = msg.as_text() {
-            if let Ok(obj) = serde_json::from_str::<Value>(body) {
-                if let Some((msg_type, payload)) = obj.as_object().map(|map| {
-                    (map.get("type").and_then(Value::as_str).unwrap_or(""),
-                     map.get("payload").unwrap_or(NULL_PAYLOAD))
-                }) {
-                    match msg_type {
-                        "echo" => {
-                            try!(self.ws.send(body));
-                        }
-                        "broadcast" => {
-                            try!(self.ws.broadcast(body));
-                            try!(self.ws.send(format!(r#"{{"type":"broadcastResult","listenCount": {}, "payload":{}}}"#,
-                                                          self.count,
-                                                          payload)))
-                        }
-                        _ => {}
-                    }
-                }
-            }
-        }
-        Ok(())
-    }
-
-    fn on_open(&mut self, _: ws::Handshake) -> ws::Result<()> {
-        self.count += 1;
-        println!("Connection Open! {}", self.count);
-        Ok(())
-    }
-
-    fn on_close(&mut self, _: ws::CloseCode, _: &str) {
-        self.count -= 1;
-        println!("Connection Closed! {}", self.count);
-    }
-}
+mod single_threaded_ws;
+mod mioco_ws;
+mod threadpool_ws;
+mod scopedpool_ws;
 
 fn main() {
+    // idea is 2 threads per core, but leave 1 for handling the ws connection itself
+    let default_threads = 2 * num_cpus::get() - 1;
+
     let matches = App::new("rust-ws-server")
                       .version("1.0")
                       .arg(Arg::with_name("address")
@@ -67,20 +32,37 @@ fn main() {
                                .required(true)
                                .takes_value(true)
                                .default_value("3000"))
-                      .get_matches();
+                      .arg(Arg::with_name("ws"))
+                      .arg(Arg::with_name("threadpool-ws"))
+                      .arg(Arg::with_name("scopedpool-ws"))
+                      .arg(Arg::with_name("mioco-ws"))
+                      .arg(Arg::with_name("threads")
+                            .short("t"))
+                      .group(ArgGroup::with_name("impls")
+                           .args(&["ws", "threadpool-ws", "scopedpool-ws", "mioco-ws"])
+                           .required(true)
+                           )
+                     .get_matches();
 
     if let (Some(address), Some(port)) = (matches.value_of("address"), matches.value_of("port")) {
-        ws::Builder::new()
-            .with_settings(ws::Settings { max_connections: 500_000, ..Default::default() })
-            .build(|out| {
-                BenchHandler {
-                    ws: out,
-                    count: 0,
-                }
-            })
-            .unwrap()
-            .listen(&*format!("{}:{}", address, port))
-            .unwrap();
+        let implementation = matches.value_of("impls").unwrap();
+        
+        match implementation {
+            "ws" => single_threaded_ws::BenchHandler::run(address, port),
+            "threadpool-ws" => {
+                let threads: usize = matches.value_of("threads").and_then(|t| t.parse().ok()).unwrap_or(default_threads);
+                threadpool_ws::BenchHandler::run(address, port, threads);
+            },
+            "scopedpool-ws" => {
+                let threads: usize = matches.value_of("threads").and_then(|t| t.parse().ok()).unwrap_or(default_threads);
+                scopedpool_ws::BenchHandler::run(address, port, threads);
+            },
+            "mioco-ws" => {
+                let threads: usize = matches.value_of("threads").and_then(|t| t.parse().ok()).unwrap_or(default_threads);
+                mioco_ws::BenchHandler::run(address, port, threads);
+            },
+            _ => unreachable!{}
+        }
     } else {
         println!("{}", matches.usage());
     }

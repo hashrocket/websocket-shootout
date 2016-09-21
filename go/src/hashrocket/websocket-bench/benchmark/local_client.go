@@ -1,21 +1,16 @@
-package main
+package benchmark
 
 import (
 	"fmt"
 	"net"
 	"strconv"
+	"sync"
 	"time"
 
 	"golang.org/x/net/websocket"
 )
 
-const (
-	clientEchoCmd = iota
-	clientBroadcastCmd
-	clientResetCmd
-)
-
-type Client struct {
+type localClient struct {
 	conn           *websocket.Conn
 	config         *websocket.Config
 	laddr          *net.TCPAddr
@@ -23,11 +18,12 @@ type Client struct {
 	origin         string
 	serverType     string
 	serverAdapter  ServerAdapter
-	cmdChan        <-chan int
-	rxErrChan      chan error
-	rttResultChan  chan time.Duration
-	doneChan       chan error
+	rttResultChan  chan<- time.Duration
+	errChan        chan<- error
 	payloadPadding string
+
+	rxBroadcastCountLock sync.Mutex
+	rxBroadcastCount     int
 }
 
 type ServerAdapter interface {
@@ -48,26 +44,23 @@ type serverSentMsg struct {
 	ListenerCount int      `json:"listenerCount"`
 }
 
-func NewClient(
+func newLocalClient(
 	laddr *net.TCPAddr,
 	dest, origin, serverType string,
-	cmdChan <-chan int,
-	rttResultChan chan time.Duration,
-	doneChan chan error,
+	rttResultChan chan<- time.Duration,
+	errChan chan error,
 	padding string,
-) (*Client, error) {
+) (*localClient, error) {
 	if origin == "" {
 		origin = dest
 	}
 
-	c := &Client{
+	c := &localClient{
 		laddr:          laddr,
 		dest:           dest,
 		origin:         origin,
-		cmdChan:        cmdChan,
-		rxErrChan:      make(chan error),
 		rttResultChan:  rttResultChan,
-		doneChan:       doneChan,
+		errChan:        errChan,
 		payloadPadding: padding,
 	}
 
@@ -123,49 +116,32 @@ func NewClient(
 		return nil, fmt.Errorf("Unknown server type: %v", serverType)
 	}
 
+	go c.rx()
+
 	return c, nil
 }
 
-func (c *Client) Run() {
-	go c.rx()
-
-	for {
-		select {
-		case cmd := <-c.cmdChan:
-			switch cmd {
-			case clientEchoCmd:
-				if err := c.serverAdapter.SendEcho(&Payload{SendTime: strconv.FormatInt(time.Now().UnixNano(), 10), Padding: c.payloadPadding}); err != nil {
-					panic("SendEcho fail")
-				}
-			case clientBroadcastCmd:
-				if err := c.serverAdapter.SendBroadcast(&Payload{SendTime: strconv.FormatInt(time.Now().UnixNano(), 10), Padding: c.payloadPadding}); err != nil {
-					panic("SendBroadcast fail")
-				}
-			case clientResetCmd:
-				c.conn.Close()
-				<-c.rxErrChan
-				if c2, err := NewClient(c.laddr, c.dest, c.origin, c.serverType, c.cmdChan, c.rttResultChan, c.doneChan, c.payloadPadding); err == nil {
-					go c2.Run()
-				} else {
-					c.doneChan <- err
-				}
-				return
-			default:
-				fmt.Println("cmd:", cmd)
-				panic("unknown cmd")
-			}
-		case err := <-c.rxErrChan:
-			c.doneChan <- err
-			return
-		}
-	}
+func (c *localClient) SendEcho() error {
+	return c.serverAdapter.SendEcho(&Payload{SendTime: strconv.FormatInt(time.Now().UnixNano(), 10), Padding: c.payloadPadding})
 }
 
-func (c *Client) rx() {
+func (c *localClient) SendBroadcast() error {
+	return c.serverAdapter.SendBroadcast(&Payload{SendTime: strconv.FormatInt(time.Now().UnixNano(), 10), Padding: c.payloadPadding})
+}
+
+func (c *localClient) ResetRxBroadcastCount() (int, error) {
+	c.rxBroadcastCountLock.Lock()
+	count := c.rxBroadcastCount
+	c.rxBroadcastCount = 0
+	c.rxBroadcastCountLock.Unlock()
+	return count, nil
+}
+
+func (c *localClient) rx() {
 	for {
 		msg, err := c.serverAdapter.Receive()
 		if err != nil {
-			c.rxErrChan <- err
+			c.errChan <- err
 			return
 		}
 
@@ -176,14 +152,59 @@ func (c *Client) rx() {
 					rtt := time.Duration(time.Now().UnixNano() - int64(sentUnixNanosecond))
 					c.rttResultChan <- rtt
 				} else {
-					c.rxErrChan <- err
+					c.errChan <- err
+					return
 				}
 			} else {
-				c.rxErrChan <- fmt.Errorf("received unparsable %s payload: %v", msg.Type, msg.Payload)
+				c.errChan <- fmt.Errorf("received unparsable %s payload: %v", msg.Type, msg.Payload)
+				return
 			}
 		case "broadcast":
+			c.rxBroadcastCountLock.Lock()
+			c.rxBroadcastCount++
+			c.rxBroadcastCountLock.Unlock()
 		default:
-			c.rxErrChan <- fmt.Errorf("received unknown message type: %v", msg.Type)
+			c.errChan <- fmt.Errorf("received unknown message type: %v", msg.Type)
+			return
 		}
 	}
+}
+
+type LocalClientPool struct {
+	laddr   *net.TCPAddr
+	clients map[int]*localClient
+}
+
+func NewLocalClientPool(laddr *net.TCPAddr) *LocalClientPool {
+	return &LocalClientPool{
+		laddr:   laddr,
+		clients: make(map[int]*localClient),
+	}
+}
+
+func (lcp *LocalClientPool) New(
+	id int,
+	dest, origin, serverType string,
+	rttResultChan chan time.Duration,
+	errChan chan error,
+	padding string,
+) (Client, error) {
+	c, err := newLocalClient(lcp.laddr, dest, origin, serverType, rttResultChan, errChan, padding)
+	if err != nil {
+		return nil, err
+	}
+
+	lcp.clients[id] = c
+
+	return c, nil
+}
+
+func (lcp *LocalClientPool) Close() error {
+	for _, c := range lcp.clients {
+		if err := c.conn.Close(); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

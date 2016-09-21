@@ -1,4 +1,4 @@
-package main
+package benchmark
 
 import (
 	"golang.org/x/net/websocket"
