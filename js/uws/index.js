@@ -16,10 +16,11 @@ function echo(ws, payload) {
 
 function broadcast(ws, payload) {
   var msg = JSON.stringify({type: "broadcast", payload: payload});
-  wss.broadcast(msg);
 
   if (cluster.isWorker) {
     process.send(msg);
+  } else {
+    wss.broadcast(msg);
   }
 
   ws.send(JSON.stringify({type: "broadcastResult", payload: payload}));
