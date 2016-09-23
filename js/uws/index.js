@@ -2,13 +2,27 @@
 
 var WebSocketServer = require('uws').Server;
 var wss             = new WebSocketServer({ port: 3334 });
+var cluster         = require('cluster');
+
+if (cluster.isWorker) {
+  process.on('message', function(msg) {
+    wss.broadcast(msg);
+  });
+}
 
 function echo(ws, payload) {
   ws.send(JSON.stringify({type: "echo", payload: payload}));
 }
 
 function broadcast(ws, payload) {
-  wss.broadcast(JSON.stringify({type: "broadcast", payload: payload}));
+  var msg = JSON.stringify({type: "broadcast", payload: payload});
+
+  if (cluster.isWorker) {
+    process.send(msg);
+  } else {
+    wss.broadcast(msg);
+  }
+
   ws.send(JSON.stringify({type: "broadcastResult", payload: payload}));
 }
 
