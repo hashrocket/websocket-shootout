@@ -17,6 +17,7 @@ OptionParser.new do |opts|
   end
 end.parse!
 
+EM.epoll
 EM.run {
   @channel = EM::Channel.new
 
