@@ -10,12 +10,15 @@
 
 struct cliOptions {
   int port;
+  int threadCount;
 };
 
 std::unique_ptr<cliOptions> parseCLI(int argc, const char * argv[]) {
   TCLAP::CmdLine cmd("cpp-uwebsockets-server", ' ', "0.1");
   TCLAP::ValueArg<int> portArg("p", "port", "port to listen on", false, 3000, "int");
   cmd.add(portArg);
+  TCLAP::ValueArg<int> threadCountArg("", "thread", "number of threads", false, 8, "int");
+  cmd.add(threadCountArg);
 
   cmd.parse(argc, argv);
 
@@ -36,7 +39,7 @@ int main(int argc, const char * argv[]) {
   }
 
   try {
-    server s(cliOptions->port);
+    server s(cliOptions->port, cliOptions->threadCount);
     s.run();
   }
   catch (...) {

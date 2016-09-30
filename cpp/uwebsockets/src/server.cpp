@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <functional>
+#include <thread>
 
 #include "server.h"
 
@@ -8,12 +9,30 @@ using namespace std;
 using namespace uWS;
 using namespace rapidjson;
 
-server::server(int port)
+server::server(int port, int threadCount)
 	: port{port}
 	, uwsES(uWS::MASTER)
 	, uwsServer(this->uwsES, this->port, PERMESSAGE_DEFLATE, 0)
 {
 	uwsServer.onMessage(bind(&server::onMessage, this, placeholders::_1, placeholders::_2, placeholders::_3, placeholders::_4));
+
+	if (threadCount > 1) {
+		threadServers.resize(threadCount);
+		threadServerMutexes.resize(threadCount);
+
+		for (int i = 0; i < threadCount; i++) {
+			new thread([this, i]{
+					EventSystem tes(WORKER);
+					this->threadServers[i] = new Server(tes, 0);
+
+					this->threadServers[i]->onMessage(bind(&server::onMessage, this, placeholders::_1, placeholders::_2, placeholders::_3, placeholders::_4));
+
+					tes.run();
+			});
+		}
+
+		uwsServer.onUpgrade(bind(&server::onUpgrade, this, placeholders::_1, placeholders::_2, placeholders::_3, placeholders::_4, placeholders::_5));
+	}
 }
 
 void server::echo(WebSocket socket, Value& payloadVal)
@@ -41,7 +60,14 @@ void server::broadcast(WebSocket socket, Value& payloadVal)
 	Writer<StringBuffer> broadcastWriter(broadcastBuffer);
 	broadcastDoc.Accept(broadcastWriter);
 
-	uwsServer.broadcast((char*) broadcastBuffer.GetString(), broadcastBuffer.GetSize(), OpCode::TEXT);
+	if (threadServers.size() > 0) {
+		for (int i = 0; i < threadServers.size(); i++) {
+			std::lock_guard<std::mutex> lock(*threadServerMutexes[i]);
+			threadServers[i]->broadcast((char*) broadcastBuffer.GetString(), broadcastBuffer.GetSize(), OpCode::TEXT);
+		}
+	} else {
+		uwsServer.broadcast((char*) broadcastBuffer.GetString(), broadcastBuffer.GetSize(), OpCode::TEXT);
+	}
 
 	Document resultDoc;
 	resultDoc.SetObject();
@@ -76,6 +102,11 @@ void server::onMessage(uWS::WebSocket socket, char *message, size_t length, OpCo
 	else {
 		cout << "bad type";
 	}
+}
+
+void server::onUpgrade(uv_os_fd_t fd, const char *secKey, void *ssl, const char *extensions, size_t extensionsLength) {
+	// we transfer the connection to one of the other servers
+	threadServers[rand() % threadServers.size()]->upgrade(fd, secKey, ssl, extensions, extensionsLength);
 }
 
 void server::run()
