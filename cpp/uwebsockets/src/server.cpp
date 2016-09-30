@@ -14,13 +14,12 @@ server::server(int port, int threadCount)
 	, uwsES(uWS::MASTER)
 	, uwsServer(this->uwsES, this->port, PERMESSAGE_DEFLATE, 0)
 {
-	uwsServer.onMessage(bind(&server::onMessage, this, placeholders::_1, placeholders::_2, placeholders::_3, placeholders::_4));
-
 	if (threadCount > 1) {
 		threadServers.resize(threadCount);
-		threadServerMutexes.resize(threadCount);
 
 		for (int i = 0; i < threadCount; i++) {
+		  threadServerMutexes.push_back(make_unique<mutex>());
+
 			new thread([this, i]{
 					EventSystem tes(WORKER);
 					this->threadServers[i] = new Server(tes, 0);
@@ -32,7 +31,9 @@ server::server(int port, int threadCount)
 		}
 
 		uwsServer.onUpgrade(bind(&server::onUpgrade, this, placeholders::_1, placeholders::_2, placeholders::_3, placeholders::_4, placeholders::_5));
-	}
+	} else {
+	  uwsServer.onMessage(bind(&server::onMessage, this, placeholders::_1, placeholders::_2, placeholders::_3, placeholders::_4));
+  }
 }
 
 void server::echo(WebSocket socket, Value& payloadVal)
@@ -105,7 +106,6 @@ void server::onMessage(uWS::WebSocket socket, char *message, size_t length, OpCo
 }
 
 void server::onUpgrade(uv_os_fd_t fd, const char *secKey, void *ssl, const char *extensions, size_t extensionsLength) {
-	// we transfer the connection to one of the other servers
 	threadServers[rand() % threadServers.size()]->upgrade(fd, secKey, ssl, extensions, extensionsLength);
 }
 

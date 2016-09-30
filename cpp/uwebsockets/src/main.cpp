@@ -24,6 +24,7 @@ std::unique_ptr<cliOptions> parseCLI(int argc, const char * argv[]) {
 
   auto options = std::make_unique<cliOptions>();
   options->port = portArg.getValue();
+  options->threadCount = threadCountArg.getValue();
 
   return options;
 }
