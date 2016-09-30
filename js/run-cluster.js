@@ -41,7 +41,7 @@ if (cluster.isMaster) {
 
   cluster.on('message', (worker, msg) => {
     Object.keys(cluster.workers).forEach((id) => {
-      if (id !== worker.id) {
+      if (parseInt(id) !== worker.id) {
         cluster.workers[id].send(msg);
       }
     });

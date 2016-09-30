@@ -19,9 +19,8 @@ function broadcast(ws, payload) {
 
   if (cluster.isWorker) {
     process.send(msg);
-  } else {
-    wss.broadcast(msg);
   }
+  wss.broadcast(msg);
 
   ws.send(JSON.stringify({type: "broadcastResult", payload: payload}));
 }

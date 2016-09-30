@@ -19,11 +19,10 @@ function broadcast(ws, payload) {
 
   if (cluster.isWorker) {
     process.send(msg);
-  } else {
-    wss.clients.forEach(function each(client) {
-      client.send(msg);
-    });
   }
+  wss.clients.forEach(function each(client) {
+    client.send(msg);
+  });
 
   ws.send(JSON.stringify({type: "broadcastResult", payload: payload}));
 }
