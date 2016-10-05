@@ -20,8 +20,12 @@ The following platforms currently have servers implemented.
 * C++
 * Elixir / Phoenix
 * Go
+* Haskell
+* Java
 * Javascript / NodeJS
+* Ruby / EventMachine
 * Ruby / Rails
+* Rust
 
 ### Build Instructions
 
