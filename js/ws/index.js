@@ -34,6 +34,9 @@ function broadcast(ws, payload) {
 }
 
 wss.on('connection', function connection(ws) {
+  // uws removes the `upgradeReq` object right after emitting the `connection`
+  // event. The same is also done here for parity.
+  ws.upgradeReq = null;
   ws.on('message', function incoming(message) {
     var msg = JSON.parse(message);
     switch (msg.type) {
