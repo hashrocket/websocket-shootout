@@ -1,6 +1,12 @@
-var WebSocketServer = require('ws').Server;
-var wss             = new WebSocketServer({ port: 3334 });
-var cluster         = require('cluster');
+'use strict';
+
+var cluster = require('cluster');
+var ws      = require('ws');
+
+var wss = new ws.Server({
+  perMessageDeflate: false,
+  port: 3334
+});
 
 if (cluster.isWorker) {
   process.on('message', function(msg) {
