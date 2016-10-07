@@ -6,7 +6,7 @@
   "author": "Jack Christensen & Jonathan Jackson",
   "license": "MIT",
   "dependencies": {
-    "uws": "^0.8.0",
+    "uws": "^0.10.0",
     "ws": "^1.1.1"
   }
 }
