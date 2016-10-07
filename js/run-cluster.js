@@ -1,3 +1,5 @@
+'use strict';
+
 const impl = process.argv[2];
 
 if (!impl) {
@@ -8,6 +10,7 @@ if (!impl) {
 switch (impl) {
   case 'ws':
   case 'uws':
+  case 'faye':
     break;
   default:
     console.error(`Implementation: ${impl} not valid`);
