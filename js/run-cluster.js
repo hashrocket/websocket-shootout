@@ -1,6 +1,8 @@
 'use strict';
 
 const impl = process.argv[2];
+const numProcs = +process.argv[3] ?
+  +process.argv[3] : require('os').cpus().length;
 
 if (!impl) {
   console.error('No implementation provided');
@@ -18,11 +20,10 @@ switch (impl) {
 }
 
 const cluster = require('cluster');
-const numCPUs = require('os').cpus().length;
 
 if (cluster.isMaster) {
   // Fork workers.
-  for (var i = 0; i < numCPUs; i++) {
+  for (var i = 0; i < numProcs; i++) {
     cluster.fork();
   }
 
@@ -44,7 +45,7 @@ if (cluster.isMaster) {
 
   cluster.on('message', (worker, msg) => {
     Object.keys(cluster.workers).forEach((id) => {
-      if (parseInt(id) !== worker.id) {
+      if (+id !== worker.id) {
         cluster.workers[id].send(msg);
       }
     });
