@@ -1,16 +1,15 @@
 'use strict';
 
-var cluster = require('cluster');
-var ws      = require('ws');
+var WebSocket = require('faye-websocket');
+var cluster   = require('cluster');
+var http      = require('http');
 
-var wss = new ws.Server({
-  perMessageDeflate: false,
-  port: 3334
-});
+var server  = http.createServer();
+var clients = new Set();
 
 if (cluster.isWorker) {
   process.on('message', function(msg) {
-    wss.clients.forEach(function each(client) {
+    clients.forEach(function each(client) {
       client.send(msg);
     });
   });
@@ -26,19 +25,18 @@ function broadcast(ws, payload) {
   if (cluster.isWorker) {
     process.send(msg);
   }
-  wss.clients.forEach(function each(client) {
+  clients.forEach(function each(client) {
     client.send(msg);
   });
 
   ws.send(JSON.stringify({type: 'broadcastResult', payload: payload}));
 }
 
-wss.on('connection', function connection(ws) {
-  // uws removes the `upgradeReq` object right after emitting the `connection`
-  // event. The same is also done here for parity.
-  ws.upgradeReq = null;
-  ws.on('message', function incoming(message) {
-    var msg = JSON.parse(message);
+server.on('upgrade', function upgrade(request, socket, head) {
+  var ws = new WebSocket(request, socket, head);
+
+  ws.on('message', function incoming(evt) {
+    var msg = JSON.parse(evt.data);
     switch (msg.type) {
       case 'echo':
         echo(ws, msg.payload);
@@ -47,7 +45,15 @@ wss.on('connection', function connection(ws) {
         broadcast(ws, msg.payload);
         break;
       default:
-        console.log('unknown message type: %s', message);
+        console.log('unknown message type: %s', evt.data);
     }
   });
+
+  ws.on('close', function close() {
+    clients.delete(ws);
+  });
+
+  clients.add(ws);
 });
+
+server.listen(3334);
