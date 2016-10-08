@@ -9,11 +9,16 @@ var wss = new ws.Server({
 });
 
 if (cluster.isWorker) {
-  process.on('message', function(msg) {
-    wss.clients.forEach(function each(client) {
-      client.send(msg);
-    });
-  });
+  process.on('message', broadcastMessage);
+}
+
+function broadcastMessage(msg) {
+  var buf = Buffer.from(msg);
+  var opts = {binary: false};
+
+  for (var i = 0; i < wss.clients.length; i++) {
+    wss.clients[i].send(buf, opts);
+  }
 }
 
 function echo(ws, payload) {
@@ -26,9 +31,7 @@ function broadcast(ws, payload) {
   if (cluster.isWorker) {
     process.send(msg);
   }
-  wss.clients.forEach(function each(client) {
-    client.send(msg);
-  });
+  broadcastMessage(msg);
 
   ws.send(JSON.stringify({type: 'broadcastResult', payload: payload}));
 }
