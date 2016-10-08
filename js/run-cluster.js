@@ -21,12 +21,22 @@ const cluster = require('cluster');
 const numCPUs = require('os').cpus().length;
 
 if (cluster.isMaster) {
+  const onMessage = function (msg) {
+    Object.keys(cluster.workers).forEach((id) => {
+      if (+id !== this.id) {
+        cluster.workers[id].send(msg);
+      }
+    });
+  };
+
+  cluster.on('fork', (worker) => worker.on('message', onMessage));
+
   // Fork workers.
   for (var i = 0; i < numCPUs; i++) {
     cluster.fork();
   }
 
-  let onExit = () => {
+  const onExit = () => {
     cluster.removeAllListeners('exit');
     Object.keys(cluster.workers).forEach((id) => {
       cluster.workers[id].kill();
@@ -40,14 +50,6 @@ if (cluster.isMaster) {
   cluster.on('exit', (worker, code, signal) => {
     console.log(`worker ${worker.process.pid} died`);
     setTimeout(() => cluster.fork(), 1000);
-  });
-
-  cluster.on('message', (worker, msg) => {
-    Object.keys(cluster.workers).forEach((id) => {
-      if (parseInt(id) !== worker.id) {
-        cluster.workers[id].send(msg);
-      }
-    });
   });
 } else {
   require(`./${impl}/`);
