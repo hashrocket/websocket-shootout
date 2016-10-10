@@ -13,3 +13,6 @@
 [submodule "cpp/uwebsockets/vendor/uWebSockets"]
 	path = cpp/uwebsockets/vendor/uWebSockets
 	url = https://github.com/uWebSockets/uWebSockets.git
+[submodule "cpp/crow/vendor/crow"]
+	path = cpp/crow/vendor/crow
+	url = https://github.com/ipkn/crow.git
