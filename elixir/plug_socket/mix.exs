@@ -16,7 +16,6 @@ defmodule PlugSocket.Mixfile do
   def application do
     [
       applications: [
-        :logger,
         :plug,
         :cowboy,
         :gproc,
