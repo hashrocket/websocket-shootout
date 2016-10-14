@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Node.JS 4,5, or 6+
+- Node.JS 6+
 
 ## Build
 
@@ -26,4 +26,12 @@ Or, run the implementations in a cluster:
 node run-cluster.js uws
 ```
 
-`run-cluster.js` will spawn a process for each cpu core.
+By default, the cluster will spawn a worker process for each CPU (or cpu core).
+To specify the number of workers to spawn, provide the desired number to
+`run-cluster.js`:
+
+```bash
+node run-cluster.js uws 3
+```
+
+`run-cluster.js` will spawn 3 worker processes.

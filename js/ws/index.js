@@ -10,8 +10,9 @@ var wss = new ws.Server({
 
 if (cluster.isWorker) {
   process.on('message', function(msg) {
+    var msgBuf = Buffer(msg);
     wss.clients.forEach(function each(client) {
-      client.send(msg);
+      client.send(msgBuf);
     });
   });
 }
@@ -26,8 +27,10 @@ function broadcast(ws, payload) {
   if (cluster.isWorker) {
     process.send(msg);
   }
+
+  var msgBuf = Buffer(msg);
   wss.clients.forEach(function each(client) {
-    client.send(msg);
+    client.send(msgBuf);
   });
 
   ws.send(JSON.stringify({type: 'broadcastResult', payload: payload}));
