@@ -36,10 +36,7 @@ func NewBenchHandler() *benchHandler {
 	}
 }
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  256,
-	WriteBufferSize: 256,
-}
+var upgrader = websocket.Upgrader{}
 
 func (h *benchHandler) ServeHTTP(rsp http.ResponseWriter, req *http.Request) {
 	conn, err := upgrader.Upgrade(rsp, req, nil)
@@ -61,7 +58,7 @@ func (h *benchHandler) Accept(ws *websocket.Conn) {
 
 	for {
 		var msg WsMsg
-		err := websocket.ReadJSON(ws, &msg)
+		err := ws.ReadJSON(&msg)
 		if err != nil {
 			if err, ok := err.(*websocket.CloseError); ok && err.Code == websocket.CloseAbnormalClosure {
 				return
