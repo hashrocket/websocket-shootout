@@ -16,3 +16,6 @@
 [submodule "cpp/crow/vendor/crow"]
 	path = cpp/crow/vendor/crow
 	url = https://github.com/ipkn/crow.git
+[submodule "cpp/vendor/rapidjson"]
+	path = cpp/vendor/rapidjson
+	url = https://github.com/miloyip/rapidjson.git
