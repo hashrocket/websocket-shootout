@@ -27,9 +27,10 @@ defmodule PlugSocket.SocketHandler do
   end
 
   defp respond(%{"type"=> "broadcast", "payload" => payload}) do
-    payload = Poison.encode!(%{type: "broadcastResult", payload: payload})
-    :gproc.send({:p, :l, :plug_socket}, {:send, payload})
-    {:ok}
+    broadcast = Poison.encode!(%{type: "broadcast", payload: payload})
+    :gproc.send({:p, :l, :plug_socket}, {:send, broadcast})
+    broadcast_result = Poison.encode!(%{type: "broadcastResult", payload: payload})
+    {:reply, {:text, broadcast_result}}
   end
 
   # No matter why we terminate, remove all of this pids subscriptions
