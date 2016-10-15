@@ -1,8 +1,8 @@
 ## Round 2
 
-Round 2 results are still in-progress.
+This test differs from round 1 in several ways. First, the test is parallized across multiple clients. This should avoid the possibility of a servers performance being limited by the benchmark. Second, the number of broadcasts per sample was increased from 40 to 100. Thirdly, 200 bytes of padding was added to the payload. This should make the message size more realistic.
 
-These results are from running the server on one machine and the benchmark tool as another. Both machines are bare metal 4ghz i7 4790Ks with 16GB of RAM running Ubuntu 16.04 connected via GB ethernet. Tests were run multiple times and the best results were recorded.
+These results are from running the server on one machine and the benchmark tool parallelized across multiple other machines. The server is a bare metal 4ghz i7 4790K with 16GB of RAM running Ubuntu 16.04 connected via GB ethernet to the benchmark machines. Tests were run multiple times and the best results were recorded.
 
 ## Clojure
 
