@@ -34,5 +34,5 @@ make
 From the project root, run the C++ server with the following command:
 
 ```
-bin/crow-cpp-server -p 3334 --threads 8
+bin/cpp-crow-server -p 3334 --thread 8
 ```
