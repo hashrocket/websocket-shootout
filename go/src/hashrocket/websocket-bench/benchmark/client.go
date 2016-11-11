@@ -21,7 +21,7 @@ type ClientPool interface {
 		dest, origin, serverType string,
 		rttResultChan chan time.Duration,
 		errChan chan error,
-		padding string,
+		padding []byte,
 	) (Client, error)
 	Close() error
 }

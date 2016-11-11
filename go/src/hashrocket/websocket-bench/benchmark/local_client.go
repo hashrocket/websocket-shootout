@@ -10,6 +10,14 @@ import (
 	"golang.org/x/net/websocket"
 )
 
+const (
+	MsgServerEcho            = 'e'
+	MsgServerBroadcast       = 'b'
+	MsgServerBroadcastResult = 'r'
+	MsgClientEcho            = 'e'
+	MsgClientBroadcast       = 'b'
+)
+
 type localClient struct {
 	conn           *websocket.Conn
 	config         *websocket.Config
@@ -20,7 +28,7 @@ type localClient struct {
 	serverAdapter  ServerAdapter
 	rttResultChan  chan<- time.Duration
 	errChan        chan<- error
-	payloadPadding string
+	payloadPadding []byte
 
 	rxBroadcastCountLock sync.Mutex
 	rxBroadcastCount     int
@@ -33,23 +41,34 @@ type ServerAdapter interface {
 }
 
 type Payload struct {
-	SendTime string `json:"sendTime"`
-	Padding  string `json:"padding,omitempty"`
+	SendTime time.Time
+	Padding  []byte
+}
+
+// type Payload struct {
+// 	SendTime string `json:"sendTime"`
+// 	Padding  string `json:"padding,omitempty"`
+// }
+
+type serverSentMsg struct {
+	Type          byte
+	Payload       *Payload
+	ListenerCount int
 }
 
 // serverSentMsg includes all fields that can be in server sent message
-type serverSentMsg struct {
-	Type          string   `json:"type"`
-	Payload       *Payload `json:"payload"`
-	ListenerCount int      `json:"listenerCount"`
-}
+// type serverSentMsg struct {
+// 	Type          string   `json:"type"`
+// 	Payload       *Payload `json:"payload"`
+// 	ListenerCount int      `json:"listenerCount"`
+// }
 
 func newLocalClient(
 	laddr *net.TCPAddr,
 	dest, origin, serverType string,
 	rttResultChan chan<- time.Duration,
 	errChan chan error,
-	padding string,
+	padding []byte,
 ) (*localClient, error) {
 	if origin == "" {
 		origin = dest
@@ -122,11 +141,11 @@ func newLocalClient(
 }
 
 func (c *localClient) SendEcho() error {
-	return c.serverAdapter.SendEcho(&Payload{SendTime: strconv.FormatInt(time.Now().UnixNano(), 10), Padding: c.payloadPadding})
+	return c.serverAdapter.SendEcho(&Payload{SendTime: time.Now(), Padding: c.payloadPadding})
 }
 
 func (c *localClient) SendBroadcast() error {
-	return c.serverAdapter.SendBroadcast(&Payload{SendTime: strconv.FormatInt(time.Now().UnixNano(), 10), Padding: c.payloadPadding})
+	return c.serverAdapter.SendBroadcast(&Payload{SendTime: time.Now(), Padding: c.payloadPadding})
 }
 
 func (c *localClient) ResetRxBroadcastCount() (int, error) {
@@ -146,20 +165,15 @@ func (c *localClient) rx() {
 		}
 
 		switch msg.Type {
-		case "echo", "broadcastResult":
+		case MsgServerEcho, MsgServerBroadcastResult:
 			if msg.Payload != nil {
-				if sentUnixNanosecond, err := strconv.ParseInt(msg.Payload.SendTime, 10, 64); err == nil {
-					rtt := time.Duration(time.Now().UnixNano() - int64(sentUnixNanosecond))
-					c.rttResultChan <- rtt
-				} else {
-					c.errChan <- err
-					return
-				}
+				rtt := time.Now().Sub(msg.Payload.SendTime)
+				c.rttResultChan <- rtt
 			} else {
 				c.errChan <- fmt.Errorf("received unparsable %s payload: %v", msg.Type, msg.Payload)
 				return
 			}
-		case "broadcast":
+		case MsgServerBroadcast:
 			c.rxBroadcastCountLock.Lock()
 			c.rxBroadcastCount++
 			c.rxBroadcastCountLock.Unlock()
@@ -187,7 +201,7 @@ func (lcp *LocalClientPool) New(
 	dest, origin, serverType string,
 	rttResultChan chan time.Duration,
 	errChan chan error,
-	padding string,
+	padding []byte,
 ) (Client, error) {
 	c, err := newLocalClient(lcp.laddr, dest, origin, serverType, rttResultChan, errChan, padding)
 	if err != nil {

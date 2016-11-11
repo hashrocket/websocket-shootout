@@ -22,7 +22,7 @@ type WorkerConnectMsg struct {
 	Dest       string
 	Origin     string
 	ServerType string
-	Padding    string
+	Padding    []byte
 }
 
 type WorkerRTTResultMsg struct {
