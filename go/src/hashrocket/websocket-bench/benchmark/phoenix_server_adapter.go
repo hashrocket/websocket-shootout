@@ -3,6 +3,8 @@ package benchmark
 import (
 	"fmt"
 	"golang.org/x/net/websocket"
+	"strconv"
+	"time"
 )
 
 type PhoenixServerAdapter struct {
@@ -64,22 +66,31 @@ func (psa *PhoenixServerAdapter) Receive() (*serverSentMsg, error) {
 		return nil, fmt.Errorf("unexpected msg, got %v", msg)
 	}
 
-	var payload map[string]interface{}
+	var psaPayload map[string]interface{}
 
 	if response, ok := msg.Payload["response"].(map[string]interface{}); ok {
-		payload = response
+		psaPayload = response
 	} else {
-		payload = msg.Payload
+		psaPayload = msg.Payload
 	}
 
-	body := payload["body"].(map[string]interface{})
-	var padding string
-	if p, ok := body["padding"].(string); ok {
-		padding = p
+	body := psaPayload["body"].(map[string]interface{})
+
+	payload := &Payload{}
+	unixNanosecond, err := strconv.ParseInt(body["sendTime"].(string), 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	payload.SendTime = time.Unix(0, unixNanosecond)
+
+	if padding, ok := body["padding"]; ok {
+		payload.Padding = []byte(padding.(string))
 	}
 
-	return &serverSentMsg{Type: payload["type"].(string), Payload: &Payload{
-		SendTime: body["sendTime"].(string),
-		Padding:  padding,
-	}}, nil
+	msgType, err := ParseMessageType(psaPayload["type"].(string))
+	if err != nil {
+		return nil, err
+	}
+
+	return &serverSentMsg{Type: msgType, Payload: payload}, nil
 }

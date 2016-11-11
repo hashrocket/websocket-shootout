@@ -45,23 +45,23 @@ type Payload struct {
 	Padding  []byte
 }
 
-// type Payload struct {
-// 	SendTime string `json:"sendTime"`
-// 	Padding  string `json:"padding,omitempty"`
-// }
+type jsonPayload struct {
+	SendTime string `json:"sendTime"`
+	Padding  string `json:"padding,omitempty"`
+}
 
+// serverSentMsg includes all fields that can be in server sent message
 type serverSentMsg struct {
 	Type          byte
 	Payload       *Payload
 	ListenerCount int
 }
 
-// serverSentMsg includes all fields that can be in server sent message
-// type serverSentMsg struct {
-// 	Type          string   `json:"type"`
-// 	Payload       *Payload `json:"payload"`
-// 	ListenerCount int      `json:"listenerCount"`
-// }
+type jsonServerSentMsg struct {
+	Type          string       `json:"type"`
+	Payload       *jsonPayload `json:"payload"`
+	ListenerCount int          `json:"listenerCount"`
+}
 
 func newLocalClient(
 	laddr *net.TCPAddr,
