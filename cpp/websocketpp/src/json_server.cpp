@@ -4,7 +4,7 @@
 
 #include <boost/thread/shared_lock_guard.hpp>
 
-#include "server.h"
+#include "json_server.h"
 
 server::server(boost::asio::ip::tcp::endpoint ep) {
 	using websocketpp::lib::placeholders::_1;
@@ -51,7 +51,6 @@ void server::on_message(websocketpp::connection_hdl hdl, websocketpp::server<web
 		return;
 	}
 
-	Json::Value response;
 	try {
 		auto type = root["type"].asString();
 		if (type == "echo") {
@@ -61,11 +60,11 @@ void server::on_message(websocketpp::connection_hdl hdl, websocketpp::server<web
 			broadcast(hdl, root);
 		}
 		else {
-			response = "bad type";
+			std::cout << "bad type: " << type << std::endl;
 		}
 	}
 	catch (const websocketpp::lib::error_code& e) {
-		std::cout << "Echo failed because: " << e
+		std::cout << "Failed because: " << e
 			<< "(" << e.message() << ")" << std::endl;
 	}
 }

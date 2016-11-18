@@ -10,18 +10,22 @@
 
 #include <websocketpp/server.hpp>
 
-#include "server.h"
+#include "json_server.h"
+#include "binary_server.h"
 
 struct cliOptions {
 	std::string address;
+	std::string dataType;
 	int port;
 	int threadCount;
 };
 
 std::unique_ptr<cliOptions> parseCLI(int argc, const char * argv[]) {
-	TCLAP::CmdLine cmd("cpp-websocket-server", ' ', "0.1");
+	TCLAP::CmdLine cmd("cpp-websocket-server", ' ', "0.2");
 	TCLAP::ValueArg<std::string> addressArg("a", "address", "address to listen on", false, "127.0.0.1", "string");
 	cmd.add(addressArg);
+	TCLAP::ValueArg<std::string> dataTypeArg("t", "data-type", "date type (json, binary)", false, "json", "string");
+	cmd.add(dataTypeArg);
 	TCLAP::ValueArg<int> portArg("", "port", "port to listen on", false, 3000, "int");
 	cmd.add(portArg);
 	TCLAP::ValueArg<int> threadCountArg("", "thread", "number of threads", false, 8, "int");
@@ -31,6 +35,7 @@ std::unique_ptr<cliOptions> parseCLI(int argc, const char * argv[]) {
 
 	auto options = std::make_unique<cliOptions>();
 	options->address = addressArg.getValue();
+	options->dataType = dataTypeArg.getValue();
 	options->port = portArg.getValue();
 	options->threadCount = threadCountArg.getValue();
 
@@ -52,8 +57,16 @@ int main(int argc, const char * argv[]) {
 			boost::asio::ip::address::from_string(cliOptions->address),
 			cliOptions->port
 		);
-		server s(ep);
-		s.run(cliOptions->threadCount);
+
+		if (cliOptions->dataType == "json") {
+			server s(ep);
+			s.run(cliOptions->threadCount);
+		} else if (cliOptions->dataType == "binary") {
+			binary_server s(ep);
+			s.run(cliOptions->threadCount);
+		} else {
+			std::cout << "unknown data type: " << cliOptions->dataType << std::endl;
+		}
 	}
 	catch (websocketpp::exception const & e) {
 		std::cout << e.what() << std::endl;
