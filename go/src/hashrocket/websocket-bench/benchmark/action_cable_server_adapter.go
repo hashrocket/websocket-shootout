@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"golang.org/x/net/websocket"
+	"strconv"
+	"time"
 )
 
 type ActionCableServerAdapter struct {
@@ -72,12 +74,24 @@ func (acsa *ActionCableServerAdapter) Receive() (*serverSentMsg, error) {
 
 	message := msg.Message.(map[string]interface{})
 	payloadMap := message["payload"].(map[string]interface{})
-	payload := &Payload{SendTime: payloadMap["sendTime"].(string)}
+
+	payload := &Payload{}
+	unixNanosecond, err := strconv.ParseInt(payloadMap["sendTime"].(string), 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	payload.SendTime = time.Unix(0, unixNanosecond)
+
 	if padding, ok := payloadMap["padding"]; ok {
-		payload.Padding = padding.(string)
+		payload.Padding = []byte(padding.(string))
 	}
 
-	return &serverSentMsg{Type: message["action"].(string), Payload: payload}, nil
+	msgType, err := ParseMessageType(message["action"].(string))
+	if err != nil {
+		return nil, err
+	}
+
+	return &serverSentMsg{Type: msgType, Payload: payload}, nil
 }
 
 func (acsa *ActionCableServerAdapter) receiveIgnoringPing() (*acsaMsg, error) {

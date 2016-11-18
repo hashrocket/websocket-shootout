@@ -11,7 +11,7 @@ type Benchmark struct {
 	errChan       chan error
 	rttResultChan chan time.Duration
 
-	payloadPadding string
+	payloadPadding []byte
 
 	Config
 
@@ -39,10 +39,10 @@ func New(config *Config) *Benchmark {
 	b.errChan = make(chan error)
 	b.rttResultChan = make(chan time.Duration)
 
-	b.payloadPadding = strings.Repeat(
+	b.payloadPadding = []byte(strings.Repeat(
 		"1234567890",
 		b.PayloadPaddingSize/10+1,
-	)[:b.PayloadPaddingSize]
+	)[:b.PayloadPaddingSize])
 
 	return b
 }

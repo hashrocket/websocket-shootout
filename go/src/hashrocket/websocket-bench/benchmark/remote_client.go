@@ -47,7 +47,7 @@ func (rcp *RemoteClientPool) New(
 	dest, origin, serverType string,
 	rttResultChan chan time.Duration,
 	errChan chan error,
-	padding string,
+	padding []byte,
 ) (Client, error) {
 	client := &remoteClient{
 		clientPool:           rcp,
