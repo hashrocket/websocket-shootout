@@ -42,7 +42,7 @@ func (bsa *BinaryServerAdapter) Receive() (*serverSentMsg, error) {
 
 	var msg serverSentMsg
 	msg.Type = buf[0]
-	// payload size may be unneeded given it can be inferred from frame size
+	// ignoring payload size as it can be inferred from frame size -- may need to revisit this if messages span frames
 	payload := &Payload{
 		SendTime: time.Unix(0, int64(binary.BigEndian.Uint64(buf[5:13]))),
 	}

@@ -9,29 +9,28 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-type benchHandler struct {
+type jsonBenchHandler struct {
 	mutex sync.RWMutex
 	conns map[*websocket.Conn]struct{}
 }
 
-type WsMsg struct {
+type JSONWsMsg struct {
 	Type    string      `json:"type"`
 	Payload interface{} `json:"payload"`
 }
 
-type BroadcastResult struct {
-	Type          string      `json:"type"`
-	Payload       interface{} `json:"payload"`
-	ListenerCount int         `json:"listenerCount"`
+type JSONBroadcastResult struct {
+	Type    string      `json:"type"`
+	Payload interface{} `json:"payload"`
 }
 
-func NewBenchHandler() *benchHandler {
-	return &benchHandler{
+func NewJSONBenchHandler() *jsonBenchHandler {
+	return &jsonBenchHandler{
 		conns: make(map[*websocket.Conn]struct{}),
 	}
 }
 
-func (h *benchHandler) Accept(ws *websocket.Conn) {
+func (h *jsonBenchHandler) Accept(ws *websocket.Conn) {
 	defer h.cleanup(ws)
 
 	h.mutex.Lock()
@@ -39,7 +38,7 @@ func (h *benchHandler) Accept(ws *websocket.Conn) {
 	h.mutex.Unlock()
 
 	for {
-		var msg WsMsg
+		var msg JSONWsMsg
 		if err := websocket.JSON.Receive(ws, &msg); err == io.EOF {
 			return
 		} else if err != nil {
@@ -65,14 +64,14 @@ func (h *benchHandler) Accept(ws *websocket.Conn) {
 	}
 }
 
-func (h *benchHandler) echo(ws *websocket.Conn, payload interface{}) error {
-	return websocket.JSON.Send(ws, &WsMsg{Type: "echo", Payload: payload})
+func (h *jsonBenchHandler) echo(ws *websocket.Conn, payload interface{}) error {
+	return websocket.JSON.Send(ws, &JSONWsMsg{Type: "echo", Payload: payload})
 }
 
-func (h *benchHandler) broadcast(ws *websocket.Conn, payload interface{}) error {
-	result := BroadcastResult{Type: "broadcastResult", Payload: payload}
+func (h *jsonBenchHandler) broadcast(ws *websocket.Conn, payload interface{}) error {
+	result := JSONBroadcastResult{Type: "broadcastResult", Payload: payload}
 
-	msg, err := json.Marshal(&WsMsg{Type: "broadcast", Payload: payload})
+	msg, err := json.Marshal(&JSONWsMsg{Type: "broadcast", Payload: payload})
 	if err != nil {
 		log.Println("broadcast json marshal err:", err)
 	} else {
@@ -80,8 +79,9 @@ func (h *benchHandler) broadcast(ws *websocket.Conn, payload interface{}) error 
 		h.mutex.RLock()
 
 		for c := range h.conns {
-			if err := websocket.Message.Send(c, string(msg)); err == nil {
-				result.ListenerCount++
+			if err := websocket.Message.Send(c, string(msg)); err != nil {
+				h.mutex.RUnlock()
+				return err
 			}
 		}
 		h.mutex.RUnlock()
@@ -90,7 +90,7 @@ func (h *benchHandler) broadcast(ws *websocket.Conn, payload interface{}) error 
 	return websocket.JSON.Send(ws, &result)
 }
 
-func (h *benchHandler) cleanup(ws *websocket.Conn) {
+func (h *jsonBenchHandler) cleanup(ws *websocket.Conn) {
 	ws.Close()
 	h.mutex.Lock()
 

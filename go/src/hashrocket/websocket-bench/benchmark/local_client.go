@@ -115,7 +115,7 @@ func newLocalClient(
 	}
 
 	switch serverType {
-	case "standard":
+	case "json":
 		c.serverAdapter = &StandardServerAdapter{conn: c.conn}
 	case "binary":
 		c.serverAdapter = &BinaryServerAdapter{conn: c.conn}

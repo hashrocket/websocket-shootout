@@ -37,7 +37,7 @@ func main() {
 	}
 	cmdEcho.PersistentFlags().StringVarP(&options.websocketOrigin, "origin", "o", "", "websocket origin")
 	cmdEcho.PersistentFlags().StringSliceVarP(&options.localAddrs, "local-addr", "l", []string{}, "local IP address to connect from")
-	cmdEcho.PersistentFlags().StringVarP(&options.serverType, "server-type", "", "standard", "server type to connect to (standard, binary, actioncable, phoenix)")
+	cmdEcho.PersistentFlags().StringVarP(&options.serverType, "server-type", "", "json", "server type to connect to (json, binary, actioncable, phoenix)")
 	cmdEcho.PersistentFlags().StringSliceVarP(&options.workerAddrs, "worker-addr", "w", []string{}, "worker address to distribute connections to")
 	cmdEcho.Flags().IntVarP(&options.concurrent, "concurrent", "c", 50, "concurrent echo requests")
 	cmdEcho.Flags().IntVarP(&options.sampleSize, "sample-size", "s", 10000, "number of echoes in a sample")
