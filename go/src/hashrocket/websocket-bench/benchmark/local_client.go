@@ -117,6 +117,8 @@ func newLocalClient(
 	switch serverType {
 	case "standard":
 		c.serverAdapter = &StandardServerAdapter{conn: c.conn}
+	case "binary":
+		c.serverAdapter = &BinaryServerAdapter{conn: c.conn}
 	case "actioncable":
 		acsa := &ActionCableServerAdapter{conn: c.conn}
 		err = acsa.Startup()

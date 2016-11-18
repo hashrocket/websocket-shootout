@@ -25,9 +25,9 @@ func main() {
 	flag.IntVar(&options.port, "port", 3000, "port to listen on")
 	flag.Parse()
 
-	wsHandler := NewBenchHandler()
-	wsServer := websocket.Server{Handler: wsHandler.Accept}
-	http.Handle("/ws", wsServer)
+	wsJSONHandler := NewBenchHandler()
+	wsJSONServer := websocket.Server{Handler: wsJSONHandler.Accept}
+	http.Handle("/json", wsJSONServer)
 
 	listenAt := fmt.Sprintf("%s:%d", options.address, options.port)
 	log.Printf("Starting to listen on: %s\n", listenAt)
