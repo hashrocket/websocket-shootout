@@ -24,6 +24,7 @@ type Config struct {
 	ServerType         string
 	ClientCmd          int
 	PayloadPaddingSize int
+	InitialClients     int
 	StepSize           int
 	Concurrent         int
 	SampleSize         int
@@ -50,10 +51,14 @@ func New(config *Config) *Benchmark {
 func (b *Benchmark) Run() error {
 	var expectedRxBroadcastCount int
 
+	if b.InitialClients == 0 {
+		b.InitialClients = b.StepSize
+	}
+	if err := b.startClients(b.ServerType, b.InitialClients); err != nil {
+		return err
+	}
+
 	for {
-		if err := b.startClients(b.ServerType); err != nil {
-			return err
-		}
 
 		inProgress := 0
 		for i := 0; i < b.Concurrent; i++ {
@@ -124,11 +129,15 @@ func (b *Benchmark) Run() error {
 		if err != nil {
 			return err
 		}
+
+		if err := b.startClients(b.ServerType, b.StepSize); err != nil {
+			return err
+		}
 	}
 }
 
-func (b *Benchmark) startClients(serverType string) error {
-	for i := 0; i < b.StepSize; i++ {
+func (b *Benchmark) startClients(serverType string, count int) error {
+	for i := 0; i < count; i++ {
 		cp := b.ClientPools[i%len(b.ClientPools)]
 		client, err := cp.New(len(b.clients), b.WebsocketURL, b.WebsocketOrigin, b.ServerType, b.rttResultChan, b.errChan, b.payloadPadding)
 		if err != nil {

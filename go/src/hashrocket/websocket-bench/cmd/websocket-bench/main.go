@@ -15,6 +15,7 @@ var options struct {
 	serverType         string
 	concurrent         int
 	sampleSize         int
+	initialClients     int
 	stepSize           int
 	limitPercentile    int
 	limitRTT           time.Duration
@@ -59,6 +60,7 @@ func main() {
 	cmdBroadcast.PersistentFlags().StringVarP(&options.serverType, "server-type", "", "json", "server type to connect to (json, binary, actioncable, phoenix)")
 	cmdBroadcast.Flags().IntVarP(&options.concurrent, "concurrent", "c", 4, "concurrent broadcast requests")
 	cmdBroadcast.Flags().IntVarP(&options.sampleSize, "sample-size", "s", 20, "number of broadcasts in a sample")
+	cmdBroadcast.Flags().IntVarP(&options.initialClients, "initial-clients", "", 0, "initial number of clients")
 	cmdBroadcast.Flags().IntVarP(&options.stepSize, "step-size", "", 5000, "number of clients to increase each step")
 	cmdBroadcast.Flags().IntVarP(&options.limitPercentile, "limit-percentile", "", 95, "round-trip time percentile to for limit")
 	cmdBroadcast.Flags().IntVarP(&options.payloadPaddingSize, "payload-padding", "", 0, "payload padding size")
@@ -100,6 +102,7 @@ func Stress(cmd *cobra.Command, args []string) {
 	config.StepSize = options.stepSize
 	config.Concurrent = options.concurrent
 	config.SampleSize = options.sampleSize
+	config.InitialClients = options.initialClients
 	config.LimitPercentile = options.limitPercentile
 	config.LimitRTT = options.limitRTT
 	config.ResultRecorder = benchmark.NewTextResultRecorder(os.Stdout)
