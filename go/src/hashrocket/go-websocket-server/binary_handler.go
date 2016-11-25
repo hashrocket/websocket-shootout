@@ -31,7 +31,7 @@ func (h *binaryBenchHandler) Accept(ws *websocket.Conn) {
 		if err := websocket.Message.Receive(ws, &buf); err == io.EOF {
 			return
 		} else if err != nil {
-			log.Println("websocket.JSON.Receive err:", err)
+			log.Println("websocket.Message.Receive err:", err)
 			return
 		}
 
