@@ -154,7 +154,7 @@ clients: 21000    95per-rtt: 475ms    min-rtt:  69ms    median-rtt: 177ms    max
 
 ## Raw Go bench / Binary Results
 
-### C++ / uWebSockets / RapidJSON -- 1 thread
+### C++ / uWebSockets -- 1 thread
 
 Server Command
 
@@ -203,7 +203,7 @@ clients: 30000    95per-rtt: 455ms    min-rtt:  48ms    median-rtt: 421ms    max
 ```
 
 
-### C++ / WebsocketPP / jsoncpp -- 8 thread
+### C++ / WebsocketPP -- 8 thread
 
 Server Command
 
@@ -291,7 +291,7 @@ clients: 26000    95per-rtt: 479ms    min-rtt:  83ms    median-rtt: 172ms    max
 
 ## Raw C++ bench / Binary Results
 
-### C++ / uWebSockets / RapidJSON -- 1 thread
+### C++ / uWebSockets -- 1 thread
 
 Server Command
 
@@ -330,7 +330,7 @@ clients: 25000    95per-rtt: 450ms    min-rtt: 95ms    median-rtt: 354ms    max-
 ```
 
 
-### C++ / WebsocketPP / jsoncpp -- 8 thread
+### C++ / WebsocketPP -- 8 thread
 
 Note: Performance of this server was highly variable in this particular benchmark. Other runs had substantially different results.
 
