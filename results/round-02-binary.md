@@ -343,7 +343,7 @@ dev@earth:~/hashrocket/websocket-shootout/cpp/websocketpp(master*)% bin/cpp-webs
 Benchmark Output
 
 ```
-dev@mercury:~/hashrocket/websocket-shootout/cpp/bench(master+*)% bin/cpp-bench \                                                                                                                                                     [236/2219]
+dev@mercury:~/hashrocket/websocket-shootout/cpp/bench(master+*)% bin/cpp-bench \
   --concurrent 4 \
   --sample-size 100 \
   --initial-clients 10000 \
