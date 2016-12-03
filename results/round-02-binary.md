@@ -13,8 +13,6 @@ Go
 ```
 dev@earth:~/hashrocket/websocket-shootout(master*)% go version
 go version go1.7.3 linux/amd64
-dev@earth:~/hashrocket/websocket-shootout(master*)% bin/go-websocket-server -address 0.0.0.0 -port 5000
-2016/12/02 13:45:33 Starting to listen on: 0.0.0.0:5000
 ```
 
 C++
