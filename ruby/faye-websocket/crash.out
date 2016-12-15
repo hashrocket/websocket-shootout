@@ -1,0 +1,592 @@
+
+dev@earth:~/hashrocket/websocket-shootout/ruby/faye-websocket(tmp*)% puma config.ru -e production -p 8080
+Puma starting in single mode...
+* Version 3.6.2 (ruby 2.3.3-p222), codename: Sleepy Sunday Serenity
+* Min threads: 0, max threads: 16
+* Environment: production
+* Listening on tcp://0.0.0.0:8080
+Use Ctrl-C to stop
+/home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/reactor.rb:124: [BUG] Segmentation fault at 0x00000000000000
+ruby 2.3.3p222 (2016-11-21 revision 56859) [x86_64-linux]
+
+-- Control frame information -----------------------------------------------
+c:0006 p:---- s:0022 e:000021 CFUNC  :now
+c:0005 p:0014 s:0019 e:000018 BLOCK  /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/reactor.rb:124 [FINISH]
+c:0004 p:---- s:0015 e:000014 CFUNC  :synchronize
+c:0003 p:0086 s:0012 e:000011 METHOD /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/reactor.rb:123
+c:0002 p:0010 s:0005 e:000004 BLOCK  /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/reactor.rb:153 [FINISH]
+c:0001 p:---- s:0002 e:000001 (none) [FINISH]
+
+-- Ruby level backtrace information ----------------------------------------
+/home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/reactor.rb:153:in `block in run_in_thread'
+/home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/reactor.rb:123:in `run_internal'
+/home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/reactor.rb:123:in `synchronize'
+/home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/reactor.rb:124:in `block in run_internal'
+/home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/reactor.rb:124:in `now'
+
+-- Machine register context ------------------------------------------------
+ RIP: 0x00007f9fc9171ded RBP: 0x00007f9fa400cdd0 RSP: 0x00007f9fc329ba00
+ RAX: 0x0000000000000000 RBX: 0x0000000002dc2940 RCX: 0x0000000000000000
+ RDX: 0x0000000001d769e0 RDI: 0x0000000001d769e0 RSI: 0x0000000000000000
+  R8: 0x0000000000000004  R9: 0x0000000000000004 R10: 0x0000000000000060
+ R11: 0x00007f9fc339df10 R12: 0xffffffffffffffe0 R13: 0x00007f9fc90ae6c0
+ R14: 0x0000000001d769e0 R15: 0x0000000002dc2960 EFL: 0x0000000000010297
+
+-- C level backtrace information -------------------------------------------
+/home/dev/.rvm/rubies/ruby-2.3.3/bin/../lib/libruby.so.2.3(rb_vm_bugreport+0x4ea) [0x7f9fc91f88da] vm_dump.c:692
+/home/dev/.rvm/rubies/ruby-2.3.3/bin/../lib/libruby.so.2.3(rb_bug_context+0xd4) [0x7f9fc90892b4] error.c:435
+/home/dev/.rvm/rubies/ruby-2.3.3/bin/../lib/libruby.so.2.3(sigsegv+0x3e) [0x7f9fc9166e0e] signal.c:890
+/lib/x86_64-linux-gnu/libc.so.6 [0x7f9fc8c774a0]
+/home/dev/.rvm/rubies/ruby-2.3.3/bin/../lib/libruby.so.2.3(st_foreach+0xcd) [0x7f9fc9171ded] st.c:1020
+/home/dev/.rvm/rubies/ruby-2.3.3/bin/../lib/libruby.so.2.3(gc_mark_children+0x627) [0x7f9fc90ae277] gc.c:3956
+/home/dev/.rvm/rubies/ruby-2.3.3/bin/../lib/libruby.so.2.3(gc_marks_rest+0x7c) [0x7f9fc90b127c] gc.c:4534
+/home/dev/.rvm/rubies/ruby-2.3.3/bin/../lib/libruby.so.2.3(newobj_slowpath_wb_unprotected+0x2a2) [0x7f9fc90b37c2] gc.c:5436
+/home/dev/.rvm/rubies/ruby-2.3.3/bin/../lib/libruby.so.2.3(rb_data_typed_object_zalloc+0x10) [0x7f9fc90b46f0] gc.c:1948
+/home/dev/.rvm/rubies/ruby-2.3.3/bin/../lib/libruby.so.2.3(time_s_alloc+0x15) [0x7f9fc9199525] time.c:1814
+/home/dev/.rvm/rubies/ruby-2.3.3/bin/../lib/libruby.so.2.3(rb_obj_alloc+0x3a) [0x7f9fc90f19aa] object.c:1823
+/home/dev/.rvm/rubies/ruby-2.3.3/bin/../lib/libruby.so.2.3(rb_class_new_instance+0x11) [0x7f9fc90f1d01] object.c:1855
+/home/dev/.rvm/rubies/ruby-2.3.3/bin/../lib/libruby.so.2.3(vm_call_cfunc+0xf0) [0x7f9fc91e1760] vm_insnhelper.c:1642
+/home/dev/.rvm/rubies/ruby-2.3.3/bin/../lib/libruby.so.2.3(vm_exec_core+0x1219) [0x7f9fc91eaa79] insns.def:994
+/home/dev/.rvm/rubies/ruby-2.3.3/bin/../lib/libruby.so.2.3(vm_exec+0x86) [0x7f9fc91ef6d6] vm.c:1650
+/home/dev/.rvm/rubies/ruby-2.3.3/bin/../lib/libruby.so.2.3(invoke_block_from_c_0+0x2ed) [0x7f9fc91f03ad] vm.c:921
+/home/dev/.rvm/rubies/ruby-2.3.3/bin/../lib/libruby.so.2.3(rb_yield+0xa7) [0x7f9fc91f0667] vm.c:988
+/home/dev/.rvm/rubies/ruby-2.3.3/bin/../lib/libruby.so.2.3(rb_ensure+0xb0) [0x7f9fc9092510] eval.c:914
+/home/dev/.rvm/rubies/ruby-2.3.3/bin/../lib/libruby.so.2.3(vm_call_cfunc+0xf0) [0x7f9fc91e1760] vm_insnhelper.c:1642
+/home/dev/.rvm/rubies/ruby-2.3.3/bin/../lib/libruby.so.2.3(vm_exec_core+0x1148) [0x7f9fc91ea9a8] insns.def:963
+/home/dev/.rvm/rubies/ruby-2.3.3/bin/../lib/libruby.so.2.3(vm_exec+0x86) [0x7f9fc91ef6d6] vm.c:1650
+/home/dev/.rvm/rubies/ruby-2.3.3/bin/../lib/libruby.so.2.3(invoke_block_from_c_0+0x2ed) [0x7f9fc91f03ad] vm.c:921
+/home/dev/.rvm/rubies/ruby-2.3.3/bin/../lib/libruby.so.2.3(vm_invoke_proc+0xc3) [0x7f9fc91f0483] vm.c:996
+/home/dev/.rvm/rubies/ruby-2.3.3/bin/../lib/libruby.so.2.3(thread_start_func_2+0x671) [0x7f9fc9206281] thread.c:584
+/home/dev/.rvm/rubies/ruby-2.3.3/bin/../lib/libruby.so.2.3(thread_start_func_1+0xd0) [0x7f9fc9206840] thread_pthread.c:882
+/lib/x86_64-linux-gnu/libpthread.so.0(start_thread+0xca) [0x7f9fc8a2c6fa]
+/lib/x86_64-linux-gnu/libc.so.6(clone+0x6d) [0x7f9fc8d48b5d] ../sysdeps/unix/sysv/linux/x86_64/clone.S:109
+
+-- Other runtime information -----------------------------------------------
+
+* Loaded script: /home/dev/.rvm/gems/ruby-2.3.3/bin/puma
+
+* Loaded features:
+
+    0 enumerator.so
+    1 thread.rb
+    2 rational.so
+    3 complex.so
+    4 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/encdb.so
+    5 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/trans/transdb.so
+    6 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/unicode_normalize.rb
+    7 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/rbconfig.rb
+    8 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/compatibility.rb
+    9 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/defaults.rb
+   10 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/deprecate.rb
+   11 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/errors.rb
+   12 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/version.rb
+   13 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/requirement.rb
+   14 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/platform.rb
+   15 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/basic_specification.rb
+   16 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/stub_specification.rb
+   17 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/util/list.rb
+   18 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/stringio.so
+   19 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/specification.rb
+   20 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/exceptions.rb
+   21 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/dependency.rb
+   22 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/core_ext/kernel_gem.rb
+   23 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/monitor.rb
+   24 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/core_ext/kernel_require.rb
+   25 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems.rb
+   26 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/path_support.rb
+   27 /home/dev/.rvm/gems/ruby-2.3.3@global/gems/did_you_mean-1.0.0/lib/did_you_mean/version.rb
+   28 /home/dev/.rvm/gems/ruby-2.3.3@global/gems/did_you_mean-1.0.0/lib/did_you_mean/core_ext/name_error.rb
+   29 /home/dev/.rvm/gems/ruby-2.3.3@global/gems/did_you_mean-1.0.0/lib/did_you_mean/levenshtein.rb
+   30 /home/dev/.rvm/gems/ruby-2.3.3@global/gems/did_you_mean-1.0.0/lib/did_you_mean/jaro_winkler.rb
+   31 /home/dev/.rvm/gems/ruby-2.3.3@global/gems/did_you_mean-1.0.0/lib/did_you_mean/spell_checkable.rb
+   32 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/delegate.rb
+   33 /home/dev/.rvm/gems/ruby-2.3.3@global/gems/did_you_mean-1.0.0/lib/did_you_mean/spell_checkers/name_error_checkers/class_name_checker.rb
+   34 /home/dev/.rvm/gems/ruby-2.3.3@global/gems/did_you_mean-1.0.0/lib/did_you_mean/spell_checkers/name_error_checkers/variable_name_checker.rb
+   35 /home/dev/.rvm/gems/ruby-2.3.3@global/gems/did_you_mean-1.0.0/lib/did_you_mean/spell_checkers/name_error_checkers.rb
+   36 /home/dev/.rvm/gems/ruby-2.3.3@global/gems/did_you_mean-1.0.0/lib/did_you_mean/spell_checkers/method_name_checker.rb
+   37 /home/dev/.rvm/gems/ruby-2.3.3@global/gems/did_you_mean-1.0.0/lib/did_you_mean/spell_checkers/null_checker.rb
+   38 /home/dev/.rvm/gems/ruby-2.3.3@global/gems/did_you_mean-1.0.0/lib/did_you_mean/formatter.rb
+   39 /home/dev/.rvm/gems/ruby-2.3.3@global/gems/did_you_mean-1.0.0/lib/did_you_mean.rb
+   40 /home/dev/.rvm/gems/ruby-2.3.3@global/gems/executable-hooks-1.3.2/lib/executable-hooks/hooks.rb
+   41 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/etc.so
+   42 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/fileutils.rb
+   43 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/pathname.so
+   44 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/pathname.rb
+   45 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/errors.rb
+   46 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/environment_preserver.rb
+   47 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/socket.so
+   48 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/io/wait.so
+   49 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/socket.rb
+   50 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/timeout.rb
+   51 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/net/protocol.rb
+   52 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/uri/rfc2396_parser.rb
+   53 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/uri/rfc3986_parser.rb
+   54 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/uri/common.rb
+   55 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/uri/generic.rb
+   56 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/uri/ftp.rb
+   57 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/uri/http.rb
+   58 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/uri/https.rb
+   59 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/uri/ldap.rb
+   60 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/uri/ldaps.rb
+   61 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/uri/mailto.rb
+   62 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/uri.rb
+   63 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/zlib.so
+   64 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/net/http/exceptions.rb
+   65 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/net/http/header.rb
+   66 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/windows_31j.so
+   67 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/net/http/generic_request.rb
+   68 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/net/http/request.rb
+   69 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/net/http/requests.rb
+   70 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/net/http/response.rb
+   71 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/net/http/responses.rb
+   72 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/net/http/proxy_delta.rb
+   73 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/net/http/backward.rb
+   74 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/net/http.rb
+   75 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/date_core.so
+   76 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/date.rb
+   77 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/time.rb
+   78 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/io/console.so
+   79 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/user_interaction.rb
+   80 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/request/http_pool.rb
+   81 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/request/https_pool.rb
+   82 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/request/connection_pools.rb
+   83 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/request.rb
+   84 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/cgi/core.rb
+   85 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/cgi/escape.so
+   86 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/cgi/util.rb
+   87 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/cgi/cookie.rb
+   88 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/cgi.rb
+   89 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/uri_formatter.rb
+   90 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/digest.so
+   91 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/digest.rb
+   92 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/openssl.so
+   93 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/openssl/bn.rb
+   94 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/openssl/pkey.rb
+   95 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/openssl/cipher.rb
+   96 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/openssl/config.rb
+   97 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/openssl/digest.rb
+   98 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/openssl/x509.rb
+   99 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/openssl/buffering.rb
+  100 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/io/nonblock.so
+  101 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/openssl/ssl.rb
+  102 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/openssl.rb
+  103 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/securerandom.rb
+  104 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/resolv.rb
+  105 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/remote_fetcher.rb
+  106 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/gem_remote_fetcher.rb
+  107 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/digest/sha1.so
+  108 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/plugin/api/source.rb
+  109 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/plugin/api.rb
+  110 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/plugin.rb
+  111 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/util.rb
+  112 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/source/git.rb
+  113 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/source/installed.rb
+  114 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/source/specific_file.rb
+  115 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/source/local.rb
+  116 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/source/lock.rb
+  117 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/source/vendor.rb
+  118 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/source.rb
+  119 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/gem_helpers.rb
+  120 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/match_platform.rb
+  121 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/rubygems_ext.rb
+  122 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/config_file.rb
+  123 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/rubygems_integration.rb
+  124 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/version.rb
+  125 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/constants.rb
+  126 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/current_ruby.rb
+  127 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler.rb
+  128 /home/dev/.rvm/gems/ruby-2.3.3@global/gems/bundler-unload-1.0.2/lib/bundler-unload.rb
+  129 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/ext/build_error.rb
+  130 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/ext/builder.rb
+  131 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/ext/configure_builder.rb
+  132 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/tmpdir.rb
+  133 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/tempfile.rb
+  134 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/ext/ext_conf_builder.rb
+  135 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/ext/rake_builder.rb
+  136 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/optparse.rb
+  137 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/command.rb
+  138 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/ext/cmake_builder.rb
+  139 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/ext.rb
+  140 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/shared_helpers.rb
+  141 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/runtime.rb
+  142 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/settings.rb
+  143 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/strscan.so
+  144 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/source.rb
+  145 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/source/path.rb
+  146 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/source/git.rb
+  147 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/text.rb
+  148 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/name_tuple.rb
+  149 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/rubygems/spec_fetcher.rb
+  150 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/source/rubygems.rb
+  151 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/lockfile_parser.rb
+  152 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/set.rb
+  153 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/definition.rb
+  154 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/dependency.rb
+  155 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/ruby_dsl.rb
+  156 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/dsl.rb
+  157 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/source_list.rb
+  158 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/lazy_specification.rb
+  159 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/tsort.rb
+  160 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/forwardable.rb
+  161 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/spec_set.rb
+  162 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/gem_version_promoter.rb
+  163 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/source/gemspec.rb
+  164 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/dep_proxy.rb
+  165 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/ui.rb
+  166 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/ui/silent.rb
+  167 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/ui/rg_proxy.rb
+  168 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/index.rb
+  169 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/remote_specification.rb
+  170 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/stub_specification.rb
+  171 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/endpoint_specification.rb
+  172 /home/dev/.rvm/gems/ruby-2.3.3@global/gems/rubygems-bundler-1.4.4/lib/rubygems-bundler/noexec.rb
+  173 /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/thread_pool.rb
+  174 /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/const.rb
+  175 /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/events.rb
+  176 /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/null_io.rb
+  177 /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/compat.rb
+  178 /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/util.rb
+  179 /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/minissl.rb
+  180 /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/reactor.rb
+  181 /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/detect.rb
+  182 /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/delegation.rb
+  183 /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/client.rb
+  184 /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/binder.rb
+  185 /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/accept_nonblock.rb
+  186 /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/puma_http11.so
+  187 /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/server.rb
+  188 /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/rack/builder.rb
+  189 /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/plugin.rb
+  190 /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/dsl.rb
+  191 /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/configuration.rb
+  192 /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/daemon_ext.rb
+  193 /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/runner.rb
+  194 /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/single.rb
+  195 /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/cluster.rb
+  196 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/exception.rb
+  197 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/syntax_error.rb
+  198 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/psych.so
+  199 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/omap.rb
+  200 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/set.rb
+  201 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/class_loader.rb
+  202 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/scalar_scanner.rb
+  203 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/nodes/node.rb
+  204 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/nodes/stream.rb
+  205 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/nodes/document.rb
+  206 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/nodes/sequence.rb
+  207 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/nodes/scalar.rb
+  208 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/nodes/mapping.rb
+  209 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/nodes/alias.rb
+  210 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/nodes.rb
+  211 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/streaming.rb
+  212 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/visitors/visitor.rb
+  213 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/visitors/to_ruby.rb
+  214 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/visitors/emitter.rb
+  215 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/handler.rb
+  216 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/tree_builder.rb
+  217 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/visitors/yaml_tree.rb
+  218 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/json/ruby_events.rb
+  219 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/visitors/json_tree.rb
+  220 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/visitors/depth_first.rb
+  221 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/visitors.rb
+  222 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/parser.rb
+  223 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/coder.rb
+  224 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/core_ext.rb
+  225 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/deprecated.rb
+  226 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/stream.rb
+  227 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/json/yaml_events.rb
+  228 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/json/tree_builder.rb
+  229 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/json/stream.rb
+  230 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych/handlers/document_stream.rb
+  231 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/psych.rb
+  232 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/yaml.rb
+  233 /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/state_file.rb
+  234 /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/commonlogger.rb
+  235 /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/launcher.rb
+  236 /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/cli.rb
+  237 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/postit_trampoline.rb
+  238 /home/dev/.rvm/gems/ruby-2.3.3/gems/bundler-1.13.6/lib/bundler/setup.rb
+  239 /home/dev/.rvm/gems/ruby-2.3.3/gems/eventmachine-1.2.1/lib/rubyeventmachine.so
+  240 /home/dev/.rvm/gems/ruby-2.3.3/gems/eventmachine-1.2.1/lib/em/version.rb
+  241 /home/dev/.rvm/gems/ruby-2.3.3/gems/eventmachine-1.2.1/lib/em/pool.rb
+  242 /home/dev/.rvm/gems/ruby-2.3.3/gems/eventmachine-1.2.1/lib/em/deferrable.rb
+  243 /home/dev/.rvm/gems/ruby-2.3.3/gems/eventmachine-1.2.1/lib/em/future.rb
+  244 /home/dev/.rvm/gems/ruby-2.3.3/gems/eventmachine-1.2.1/lib/em/streamer.rb
+  245 /home/dev/.rvm/gems/ruby-2.3.3/gems/eventmachine-1.2.1/lib/em/spawnable.rb
+  246 /home/dev/.rvm/gems/ruby-2.3.3/gems/eventmachine-1.2.1/lib/em/processes.rb
+  247 /home/dev/.rvm/gems/ruby-2.3.3/gems/eventmachine-1.2.1/lib/em/iterator.rb
+  248 /home/dev/.rvm/gems/ruby-2.3.3/gems/eventmachine-1.2.1/lib/em/buftok.rb
+  249 /home/dev/.rvm/gems/ruby-2.3.3/gems/eventmachine-1.2.1/lib/em/timers.rb
+  250 /home/dev/.rvm/gems/ruby-2.3.3/gems/eventmachine-1.2.1/lib/em/protocols.rb
+  251 /home/dev/.rvm/gems/ruby-2.3.3/gems/eventmachine-1.2.1/lib/em/connection.rb
+  252 /home/dev/.rvm/gems/ruby-2.3.3/gems/eventmachine-1.2.1/lib/em/callback.rb
+  253 /home/dev/.rvm/gems/ruby-2.3.3/gems/eventmachine-1.2.1/lib/em/queue.rb
+  254 /home/dev/.rvm/gems/ruby-2.3.3/gems/eventmachine-1.2.1/lib/em/channel.rb
+  255 /home/dev/.rvm/gems/ruby-2.3.3/gems/eventmachine-1.2.1/lib/em/file_watch.rb
+  256 /home/dev/.rvm/gems/ruby-2.3.3/gems/eventmachine-1.2.1/lib/em/process_watch.rb
+  257 /home/dev/.rvm/gems/ruby-2.3.3/gems/eventmachine-1.2.1/lib/em/tick_loop.rb
+  258 /home/dev/.rvm/gems/ruby-2.3.3/gems/eventmachine-1.2.1/lib/em/resolver.rb
+  259 /home/dev/.rvm/gems/ruby-2.3.3/gems/eventmachine-1.2.1/lib/em/completion.rb
+  260 /home/dev/.rvm/gems/ruby-2.3.3/gems/eventmachine-1.2.1/lib/em/threaded_resource.rb
+  261 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/shellwords.rb
+  262 /home/dev/.rvm/gems/ruby-2.3.3/gems/eventmachine-1.2.1/lib/eventmachine.rb
+  263 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/base64.rb
+  264 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/digest/md5.so
+  265 /home/dev/.rvm/gems/ruby-2.3.3/gems/websocket-extensions-0.1.2/lib/websocket/extensions.rb
+  266 /home/dev/.rvm/gems/ruby-2.3.3/gems/websocket-driver-0.6.4/lib/websocket_mask.so
+  267 /home/dev/.rvm/gems/ruby-2.3.3/gems/websocket-driver-0.6.4/lib/websocket/driver/event_emitter.rb
+  268 /home/dev/.rvm/gems/ruby-2.3.3/gems/websocket-driver-0.6.4/lib/websocket/driver.rb
+  269 /home/dev/.rvm/gems/ruby-2.3.3/gems/faye-websocket-0.10.5/lib/faye/websocket/api/event_target.rb
+  270 /home/dev/.rvm/gems/ruby-2.3.3/gems/faye-websocket-0.10.5/lib/faye/websocket/api/event.rb
+  271 /home/dev/.rvm/gems/ruby-2.3.3/gems/faye-websocket-0.10.5/lib/faye/websocket/api.rb
+  272 /home/dev/.rvm/gems/ruby-2.3.3/gems/faye-websocket-0.10.5/lib/faye/rack_stream.rb
+  273 /home/dev/.rvm/gems/ruby-2.3.3/gems/faye-websocket-0.10.5/lib/faye/websocket.rb
+  274 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/json/version.rb
+  275 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/ostruct.rb
+  276 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/json/generic_object.rb
+  277 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/json/common.rb
+  278 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/utf_16be.so
+  279 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/utf_16le.so
+  280 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/utf_32be.so
+  281 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/utf_32le.so
+  282 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/json/ext/parser.so
+  283 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/json/ext/generator.so
+  284 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/json/ext.rb
+  285 /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/json.rb
+  286 /home/dev/hashrocket/websocket-shootout/ruby/faye-websocket/server.rb
+  287 /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma.rb
+  288 /home/dev/.rvm/gems/ruby-2.3.3/gems/websocket-driver-0.6.4/lib/websocket/driver/hybi.rb
+  289 /home/dev/.rvm/gems/ruby-2.3.3/gems/websocket-driver-0.6.4/lib/websocket/driver/stream_reader.rb
+  290 /home/dev/.rvm/gems/ruby-2.3.3/gems/websocket-driver-0.6.4/lib/websocket/driver/headers.rb
+  291 /home/dev/.rvm/gems/ruby-2.3.3/gems/websocket-driver-0.6.4/lib/websocket/http.rb
+  292 /home/dev/.rvm/gems/ruby-2.3.3/gems/websocket-extensions-0.1.2/lib/websocket/extensions/parser.rb
+  293 /home/dev/.rvm/gems/ruby-2.3.3/gems/websocket-driver-0.6.4/lib/websocket/driver/hybi/frame.rb
+  294 /home/dev/.rvm/gems/ruby-2.3.3/gems/websocket-driver-0.6.4/lib/websocket/driver/hybi/message.rb
+
+* Process memory map:
+
+00400000-00401000 r-xp 00000000 08:02 22433508                           /home/dev/.rvm/rubies/ruby-2.3.3/bin/ruby
+00600000-00601000 r--p 00000000 08:02 22433508                           /home/dev/.rvm/rubies/ruby-2.3.3/bin/ruby
+00601000-00602000 rw-p 00001000 08:02 22433508                           /home/dev/.rvm/rubies/ruby-2.3.3/bin/ruby
+01d75000-02e75000 rw-p 00000000 00:00 0                                  [heap]
+7f9fa4000000-7f9fa75e0000 rw-p 00000000 00:00 0
+7f9fa75e0000-7f9fa8000000 ---p 00000000 00:00 0
+7f9fac000000-7f9fac402000 rw-p 00000000 00:00 0
+7f9fac402000-7f9fb0000000 ---p 00000000 00:00 0
+7f9fb0000000-7f9fb07a7000 rw-p 00000000 00:00 0
+7f9fb07a7000-7f9fb4000000 ---p 00000000 00:00 0
+7f9fb4000000-7f9fb4021000 rw-p 00000000 00:00 0
+7f9fb4021000-7f9fb8000000 ---p 00000000 00:00 0
+7f9fb8000000-7f9fb8021000 rw-p 00000000 00:00 0
+7f9fb8021000-7f9fbc000000 ---p 00000000 00:00 0
+7f9fbc000000-7f9fbc530000 rw-p 00000000 00:00 0
+7f9fbc530000-7f9fc0000000 ---p 00000000 00:00 0
+7f9fc0ec0000-7f9fc17ee000 r--s 00000000 08:02 29904635                   /usr/lib/debug/lib/x86_64-linux-gnu/libc-2.23.so
+7f9fc17ee000-7f9fc19b6000 r--s 00000000 08:02 21234122                   /lib/x86_64-linux-gnu/libc-2.23.so
+7f9fc19b6000-7f9fc2793000 r--s 00000000 08:02 22435094                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/libruby.so.2.3.0
+7f9fc2793000-7f9fc2794000 ---p 00000000 00:00 0
+7f9fc2794000-7f9fc2995000 rw-p 00000000 00:00 0
+7f9fc2995000-7f9fc2996000 ---p 00000000 00:00 0
+7f9fc2996000-7f9fc2b97000 rw-p 00000000 00:00 0
+7f9fc2b97000-7f9fc2b98000 ---p 00000000 00:00 0
+7f9fc2b98000-7f9fc2d99000 rw-p 00000000 00:00 0
+7f9fc2d99000-7f9fc2d9a000 ---p 00000000 00:00 0
+7f9fc2d9a000-7f9fc2f9b000 rw-p 00000000 00:00 0
+7f9fc2f9b000-7f9fc2f9c000 ---p 00000000 00:00 0
+7f9fc2f9c000-7f9fc319d000 rw-p 00000000 00:00 0
+7f9fc319d000-7f9fc319e000 ---p 00000000 00:00 0
+7f9fc319e000-7f9fc339f000 rw-p 00000000 00:00 0
+7f9fc339f000-7f9fc33a9000 r-xp 00000000 08:02 22434826                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/json/ext/generator.so
+7f9fc33a9000-7f9fc35a8000 ---p 0000a000 08:02 22434826                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/json/ext/generator.so
+7f9fc35a8000-7f9fc35a9000 r--p 00009000 08:02 22434826                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/json/ext/generator.so
+7f9fc35a9000-7f9fc35aa000 rw-p 0000a000 08:02 22434826                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/json/ext/generator.so
+7f9fc35aa000-7f9fc35ab000 r-xp 00000000 08:02 22434757                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/utf_32le.so
+7f9fc35ab000-7f9fc37ab000 ---p 00001000 08:02 22434757                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/utf_32le.so
+7f9fc37ab000-7f9fc37ac000 r--p 00001000 08:02 22434757                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/utf_32le.so
+7f9fc37ac000-7f9fc37ad000 rw-p 00002000 08:02 22434757                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/utf_32le.so
+7f9fc37ad000-7f9fc37ae000 r-xp 00000000 08:02 22434781                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/utf_32be.so
+7f9fc37ae000-7f9fc39ae000 ---p 00001000 08:02 22434781                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/utf_32be.so
+7f9fc39ae000-7f9fc39af000 r--p 00001000 08:02 22434781                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/utf_32be.so
+7f9fc39af000-7f9fc39b0000 rw-p 00002000 08:02 22434781                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/utf_32be.so
+7f9fc39b0000-7f9fc39b1000 r-xp 00000000 08:02 22434754                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/utf_16le.so
+7f9fc39b1000-7f9fc3bb1000 ---p 00001000 08:02 22434754                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/utf_16le.so
+7f9fc3bb1000-7f9fc3bb2000 r--p 00001000 08:02 22434754                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/utf_16le.so
+7f9fc3bb2000-7f9fc3bb3000 rw-p 00002000 08:02 22434754                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/utf_16le.so
+7f9fc3bb3000-7f9fc3bb4000 r-xp 00000000 08:02 22434764                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/utf_16be.so
+7f9fc3bb4000-7f9fc3db4000 ---p 00001000 08:02 22434764                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/utf_16be.so
+7f9fc3db4000-7f9fc3db5000 r--p 00001000 08:02 22434764                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/utf_16be.so
+7f9fc3db5000-7f9fc3db6000 rw-p 00002000 08:02 22434764                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/utf_16be.so
+7f9fc3db6000-7f9fc3dbc000 r-xp 00000000 08:02 22434827                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/json/ext/parser.so
+7f9fc3dbc000-7f9fc3fbb000 ---p 00006000 08:02 22434827                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/json/ext/parser.so
+7f9fc3fbb000-7f9fc3fbc000 r--p 00005000 08:02 22434827                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/json/ext/parser.so
+7f9fc3fbc000-7f9fc3fbd000 rw-p 00006000 08:02 22434827                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/json/ext/parser.so
+7f9fc3fbd000-7f9fc3fbe000 r-xp 00000000 08:02 22435991                   /home/dev/.rvm/gems/ruby-2.3.3/gems/websocket-driver-0.6.4/lib/websocket_mask.so
+7f9fc3fbe000-7f9fc41bd000 ---p 00001000 08:02 22435991                   /home/dev/.rvm/gems/ruby-2.3.3/gems/websocket-driver-0.6.4/lib/websocket_mask.so
+7f9fc41bd000-7f9fc41be000 r--p 00000000 08:02 22435991                   /home/dev/.rvm/gems/ruby-2.3.3/gems/websocket-driver-0.6.4/lib/websocket_mask.so
+7f9fc41be000-7f9fc41bf000 rw-p 00001000 08:02 22435991                   /home/dev/.rvm/gems/ruby-2.3.3/gems/websocket-driver-0.6.4/lib/websocket_mask.so
+7f9fc41bf000-7f9fc41c0000 r-xp 00000000 08:02 22434838                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/digest/md5.so
+7f9fc41c0000-7f9fc43bf000 ---p 00001000 08:02 22434838                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/digest/md5.so
+7f9fc43bf000-7f9fc43c0000 r--p 00000000 08:02 22434838                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/digest/md5.so
+7f9fc43c0000-7f9fc43c1000 rw-p 00001000 08:02 22434838                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/digest/md5.so
+7f9fc43c1000-7f9fc43d7000 r-xp 00000000 08:02 21233739                   /lib/x86_64-linux-gnu/libgcc_s.so.1
+7f9fc43d7000-7f9fc45d6000 ---p 00016000 08:02 21233739                   /lib/x86_64-linux-gnu/libgcc_s.so.1
+7f9fc45d6000-7f9fc45d7000 rw-p 00015000 08:02 21233739                   /lib/x86_64-linux-gnu/libgcc_s.so.1
+7f9fc45d7000-7f9fc4749000 r-xp 00000000 08:02 29889913                   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.21
+7f9fc4749000-7f9fc4949000 ---p 00172000 08:02 29889913                   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.21
+7f9fc4949000-7f9fc4953000 r--p 00172000 08:02 29889913                   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.21
+7f9fc4953000-7f9fc4955000 rw-p 0017c000 08:02 29889913                   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.21
+7f9fc4955000-7f9fc4959000 rw-p 00000000 00:00 0
+7f9fc4959000-7f9fc4985000 r-xp 00000000 08:02 22435711                   /home/dev/.rvm/gems/ruby-2.3.3/gems/eventmachine-1.2.1/lib/rubyeventmachine.so
+7f9fc4985000-7f9fc4b85000 ---p 0002c000 08:02 22435711                   /home/dev/.rvm/gems/ruby-2.3.3/gems/eventmachine-1.2.1/lib/rubyeventmachine.so
+7f9fc4b85000-7f9fc4b86000 r--p 0002c000 08:02 22435711                   /home/dev/.rvm/gems/ruby-2.3.3/gems/eventmachine-1.2.1/lib/rubyeventmachine.so
+7f9fc4b86000-7f9fc4b88000 rw-p 0002d000 08:02 22435711                   /home/dev/.rvm/gems/ruby-2.3.3/gems/eventmachine-1.2.1/lib/rubyeventmachine.so
+7f9fc4b88000-7f9fc4ba5000 r-xp 00000000 08:02 29885321                   /usr/lib/x86_64-linux-gnu/libyaml-0.so.2.0.4
+7f9fc4ba5000-7f9fc4da5000 ---p 0001d000 08:02 29885321                   /usr/lib/x86_64-linux-gnu/libyaml-0.so.2.0.4
+7f9fc4da5000-7f9fc4da6000 r--p 0001d000 08:02 29885321                   /usr/lib/x86_64-linux-gnu/libyaml-0.so.2.0.4
+7f9fc4da6000-7f9fc4da7000 rw-p 0001e000 08:02 29885321                   /usr/lib/x86_64-linux-gnu/libyaml-0.so.2.0.4
+7f9fc4da7000-7f9fc4dad000 r-xp 00000000 08:02 22434811                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/psych.so
+7f9fc4dad000-7f9fc4fac000 ---p 00006000 08:02 22434811                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/psych.so
+7f9fc4fac000-7f9fc4fad000 r--p 00005000 08:02 22434811                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/psych.so
+7f9fc4fad000-7f9fc4fae000 rw-p 00006000 08:02 22434811                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/psych.so
+7f9fc4fae000-7f9fc4fb6000 r-xp 00000000 08:02 22551087                   /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/puma_http11.so
+7f9fc4fb6000-7f9fc51b5000 ---p 00008000 08:02 22551087                   /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/puma_http11.so
+7f9fc51b5000-7f9fc51b6000 r--p 00007000 08:02 22551087                   /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/puma_http11.so
+7f9fc51b6000-7f9fc51b7000 rw-p 00008000 08:02 22551087                   /home/dev/.rvm/gems/ruby-2.3.3/gems/puma-3.6.2/lib/puma/puma_http11.so
+7f9fc51b7000-7f9fc51bd000 r-xp 00000000 08:02 22434816                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/strscan.so
+7f9fc51bd000-7f9fc53bc000 ---p 00006000 08:02 22434816                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/strscan.so
+7f9fc53bc000-7f9fc53bd000 r--p 00005000 08:02 22434816                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/strscan.so
+7f9fc53bd000-7f9fc53be000 rw-p 00006000 08:02 22434816                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/strscan.so
+7f9fc53be000-7f9fc53bf000 r-xp 00000000 08:02 22434835                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/digest/sha1.so
+7f9fc53bf000-7f9fc55be000 ---p 00001000 08:02 22434835                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/digest/sha1.so
+7f9fc55be000-7f9fc55bf000 r--p 00000000 08:02 22434835                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/digest/sha1.so
+7f9fc55bf000-7f9fc55c0000 rw-p 00001000 08:02 22434835                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/digest/sha1.so
+7f9fc55c0000-7f9fc55c1000 r-xp 00000000 08:02 22434845                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/io/nonblock.so
+7f9fc55c1000-7f9fc57c1000 ---p 00001000 08:02 22434845                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/io/nonblock.so
+7f9fc57c1000-7f9fc57c2000 r--p 00001000 08:02 22434845                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/io/nonblock.so
+7f9fc57c2000-7f9fc57c3000 rw-p 00002000 08:02 22434845                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/io/nonblock.so
+7f9fc57c3000-7f9fc57c7000 r-xp 00000000 08:02 22434840                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/digest.so
+7f9fc57c7000-7f9fc59c6000 ---p 00004000 08:02 22434840                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/digest.so
+7f9fc59c6000-7f9fc59c7000 r--p 00003000 08:02 22434840                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/digest.so
+7f9fc59c7000-7f9fc59c8000 rw-p 00004000 08:02 22434840                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/digest.so
+7f9fc59c8000-7f9fc5be2000 r-xp 00000000 08:02 21235446                   /lib/x86_64-linux-gnu/libcrypto.so.1.0.0
+7f9fc5be2000-7f9fc5de1000 ---p 0021a000 08:02 21235446                   /lib/x86_64-linux-gnu/libcrypto.so.1.0.0
+7f9fc5de1000-7f9fc5dfd000 r--p 00219000 08:02 21235446                   /lib/x86_64-linux-gnu/libcrypto.so.1.0.0
+7f9fc5dfd000-7f9fc5e09000 rw-p 00235000 08:02 21235446                   /lib/x86_64-linux-gnu/libcrypto.so.1.0.0
+7f9fc5e09000-7f9fc5e0c000 rw-p 00000000 00:00 0
+7f9fc5e0c000-7f9fc5e6a000 r-xp 00000000 08:02 21236379                   /lib/x86_64-linux-gnu/libssl.so.1.0.0
+7f9fc5e6a000-7f9fc606a000 ---p 0005e000 08:02 21236379                   /lib/x86_64-linux-gnu/libssl.so.1.0.0
+7f9fc606a000-7f9fc606e000 r--p 0005e000 08:02 21236379                   /lib/x86_64-linux-gnu/libssl.so.1.0.0
+7f9fc606e000-7f9fc6075000 rw-p 00062000 08:02 21236379                   /lib/x86_64-linux-gnu/libssl.so.1.0.0
+7f9fc6075000-7f9fc60c7000 r-xp 00000000 08:02 22434855                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/openssl.so
+7f9fc60c7000-7f9fc62c6000 ---p 00052000 08:02 22434855                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/openssl.so
+7f9fc62c6000-7f9fc62c8000 r--p 00051000 08:02 22434855                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/openssl.so
+7f9fc62c8000-7f9fc62ca000 rw-p 00053000 08:02 22434855                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/openssl.so
+7f9fc62ca000-7f9fc62cb000 rw-p 00000000 00:00 0
+7f9fc62cb000-7f9fc62cc000 r-xp 00000000 08:02 22434849                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/cgi/escape.so
+7f9fc62cc000-7f9fc64cc000 ---p 00001000 08:02 22434849                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/cgi/escape.so
+7f9fc64cc000-7f9fc64cd000 r--p 00001000 08:02 22434849                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/cgi/escape.so
+7f9fc64cd000-7f9fc64ce000 rw-p 00002000 08:02 22434849                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/cgi/escape.so
+7f9fc64ce000-7f9fc64d2000 r-xp 00000000 08:02 22434844                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/io/console.so
+7f9fc64d2000-7f9fc66d2000 ---p 00004000 08:02 22434844                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/io/console.so
+7f9fc66d2000-7f9fc66d3000 r--p 00004000 08:02 22434844                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/io/console.so
+7f9fc66d3000-7f9fc66d4000 rw-p 00005000 08:02 22434844                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/io/console.so
+7f9fc66d4000-7f9fc6707000 r-xp 00000000 08:02 22434821                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/date_core.so
+7f9fc6707000-7f9fc6907000 ---p 00033000 08:02 22434821                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/date_core.so
+7f9fc6907000-7f9fc6908000 r--p 00033000 08:02 22434821                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/date_core.so
+7f9fc6908000-7f9fc6909000 rw-p 00034000 08:02 22434821                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/date_core.so
+7f9fc6909000-7f9fc690a000 rw-p 00000000 00:00 0
+7f9fc690a000-7f9fc690d000 r-xp 00000000 08:02 22434760                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/windows_31j.so
+7f9fc690d000-7f9fc6b0c000 ---p 00003000 08:02 22434760                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/windows_31j.so
+7f9fc6b0c000-7f9fc6b0d000 r--p 00002000 08:02 22434760                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/windows_31j.so
+7f9fc6b0d000-7f9fc6b0e000 rw-p 00003000 08:02 22434760                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/windows_31j.so
+7f9fc6b0e000-7f9fc6b27000 r-xp 00000000 08:02 21233735                   /lib/x86_64-linux-gnu/libz.so.1.2.8
+7f9fc6b27000-7f9fc6d26000 ---p 00019000 08:02 21233735                   /lib/x86_64-linux-gnu/libz.so.1.2.8
+7f9fc6d26000-7f9fc6d27000 r--p 00018000 08:02 21233735                   /lib/x86_64-linux-gnu/libz.so.1.2.8
+7f9fc6d27000-7f9fc6d28000 rw-p 00019000 08:02 21233735                   /lib/x86_64-linux-gnu/libz.so.1.2.8
+7f9fc6d28000-7f9fc6d38000 r-xp 00000000 08:02 22434831                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/zlib.so
+7f9fc6d38000-7f9fc6f37000 ---p 00010000 08:02 22434831                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/zlib.so
+7f9fc6f37000-7f9fc6f38000 r--p 0000f000 08:02 22434831                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/zlib.so
+7f9fc6f38000-7f9fc6f39000 rw-p 00010000 08:02 22434831                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/zlib.so
+7f9fc6f39000-7f9fc6f3a000 r-xp 00000000 08:02 22434846                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/io/wait.so
+7f9fc6f3a000-7f9fc713a000 ---p 00001000 08:02 22434846                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/io/wait.so
+7f9fc713a000-7f9fc713b000 r--p 00001000 08:02 22434846                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/io/wait.so
+7f9fc713b000-7f9fc713c000 rw-p 00002000 08:02 22434846                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/io/wait.so
+7f9fc713c000-7f9fc7168000 r-xp 00000000 08:02 22434847                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/socket.so
+7f9fc7168000-7f9fc7367000 ---p 0002c000 08:02 22434847                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/socket.so
+7f9fc7367000-7f9fc7368000 r--p 0002b000 08:02 22434847                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/socket.so
+7f9fc7368000-7f9fc7369000 rw-p 0002c000 08:02 22434847                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/socket.so
+7f9fc7369000-7f9fc7370000 r-xp 00000000 08:02 22434819                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/pathname.so
+7f9fc7370000-7f9fc756f000 ---p 00007000 08:02 22434819                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/pathname.so
+7f9fc756f000-7f9fc7570000 r--p 00006000 08:02 22434819                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/pathname.so
+7f9fc7570000-7f9fc7571000 rw-p 00007000 08:02 22434819                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/pathname.so
+7f9fc7571000-7f9fc7577000 r-xp 00000000 08:02 22434829                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/etc.so
+7f9fc7577000-7f9fc7776000 ---p 00006000 08:02 22434829                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/etc.so
+7f9fc7776000-7f9fc7777000 r--p 00005000 08:02 22434829                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/etc.so
+7f9fc7777000-7f9fc7778000 rw-p 00006000 08:02 22434829                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/etc.so
+7f9fc7778000-7f9fc7780000 r-xp 00000000 08:02 22434815                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/stringio.so
+7f9fc7780000-7f9fc797f000 ---p 00008000 08:02 22434815                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/stringio.so
+7f9fc797f000-7f9fc7980000 r--p 00007000 08:02 22434815                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/stringio.so
+7f9fc7980000-7f9fc7981000 rw-p 00008000 08:02 22434815                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/stringio.so
+7f9fc7981000-7f9fc7983000 r-xp 00000000 08:02 22434791                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/trans/transdb.so
+7f9fc7983000-7f9fc7b83000 ---p 00002000 08:02 22434791                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/trans/transdb.so
+7f9fc7b83000-7f9fc7b84000 r--p 00002000 08:02 22434791                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/trans/transdb.so
+7f9fc7b84000-7f9fc7b85000 rw-p 00003000 08:02 22434791                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/trans/transdb.so
+7f9fc7b85000-7f9fc7b87000 r-xp 00000000 08:02 22434768                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/encdb.so
+7f9fc7b87000-7f9fc7d86000 ---p 00002000 08:02 22434768                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/encdb.so
+7f9fc7d86000-7f9fc7d87000 r--p 00001000 08:02 22434768                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/encdb.so
+7f9fc7d87000-7f9fc7d88000 rw-p 00002000 08:02 22434768                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/ruby/2.3.0/x86_64-linux/enc/encdb.so
+7f9fc7d88000-7f9fc8060000 r--p 00000000 08:02 29893381                   /usr/lib/locale/locale-archive
+7f9fc8060000-7f9fc8168000 r-xp 00000000 08:02 21234111                   /lib/x86_64-linux-gnu/libm-2.23.so
+7f9fc8168000-7f9fc8367000 ---p 00108000 08:02 21234111                   /lib/x86_64-linux-gnu/libm-2.23.so
+7f9fc8367000-7f9fc8368000 r--p 00107000 08:02 21234111                   /lib/x86_64-linux-gnu/libm-2.23.so
+7f9fc8368000-7f9fc8369000 rw-p 00108000 08:02 21234111                   /lib/x86_64-linux-gnu/libm-2.23.so
+7f9fc8369000-7f9fc8372000 r-xp 00000000 08:02 21234112                   /lib/x86_64-linux-gnu/libcrypt-2.23.so
+7f9fc8372000-7f9fc8571000 ---p 00009000 08:02 21234112                   /lib/x86_64-linux-gnu/libcrypt-2.23.so
+7f9fc8571000-7f9fc8572000 r--p 00008000 08:02 21234112                   /lib/x86_64-linux-gnu/libcrypt-2.23.so
+7f9fc8572000-7f9fc8573000 rw-p 00009000 08:02 21234112                   /lib/x86_64-linux-gnu/libcrypt-2.23.so
+7f9fc8573000-7f9fc85a1000 rw-p 00000000 00:00 0
+7f9fc85a1000-7f9fc85a4000 r-xp 00000000 08:02 21234123                   /lib/x86_64-linux-gnu/libdl-2.23.so
+7f9fc85a4000-7f9fc87a3000 ---p 00003000 08:02 21234123                   /lib/x86_64-linux-gnu/libdl-2.23.so
+7f9fc87a3000-7f9fc87a4000 r--p 00002000 08:02 21234123                   /lib/x86_64-linux-gnu/libdl-2.23.so
+7f9fc87a4000-7f9fc87a5000 rw-p 00003000 08:02 21234123                   /lib/x86_64-linux-gnu/libdl-2.23.so
+7f9fc87a5000-7f9fc8824000 r-xp 00000000 08:02 29884626                   /usr/lib/x86_64-linux-gnu/libgmp.so.10.3.0
+7f9fc8824000-7f9fc8a23000 ---p 0007f000 08:02 29884626                   /usr/lib/x86_64-linux-gnu/libgmp.so.10.3.0
+7f9fc8a23000-7f9fc8a24000 r--p 0007e000 08:02 29884626                   /usr/lib/x86_64-linux-gnu/libgmp.so.10.3.0
+7f9fc8a24000-7f9fc8a25000 rw-p 0007f000 08:02 29884626                   /usr/lib/x86_64-linux-gnu/libgmp.so.10.3.0
+7f9fc8a25000-7f9fc8a3d000 r-xp 00000000 08:02 21234121                   /lib/x86_64-linux-gnu/libpthread-2.23.so
+7f9fc8a3d000-7f9fc8c3c000 ---p 00018000 08:02 21234121                   /lib/x86_64-linux-gnu/libpthread-2.23.so
+7f9fc8c3c000-7f9fc8c3d000 r--p 00017000 08:02 21234121                   /lib/x86_64-linux-gnu/libpthread-2.23.so
+7f9fc8c3d000-7f9fc8c3e000 rw-p 00018000 08:02 21234121                   /lib/x86_64-linux-gnu/libpthread-2.23.so
+7f9fc8c3e000-7f9fc8c42000 rw-p 00000000 00:00 0
+7f9fc8c42000-7f9fc8e02000 r-xp 00000000 08:02 21234122                   /lib/x86_64-linux-gnu/libc-2.23.so
+7f9fc8e02000-7f9fc9001000 ---p 001c0000 08:02 21234122                   /lib/x86_64-linux-gnu/libc-2.23.so
+7f9fc9001000-7f9fc9005000 r--p 001bf000 08:02 21234122                   /lib/x86_64-linux-gnu/libc-2.23.so
+7f9fc9005000-7f9fc9007000 rw-p 001c3000 08:02 21234122                   /lib/x86_64-linux-gnu/libc-2.23.so
+7f9fc9007000-7f9fc900b000 rw-p 00000000 00:00 0
+7f9fc900b000-7f9fc92df000 r-xp 00000000 08:02 22435094                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/libruby.so.2.3.0
+7f9fc92df000-7f9fc94de000 ---p 002d4000 08:02 22435094                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/libruby.so.2.3.0
+7f9fc94de000-7f9fc94e4000 r--p 002d3000 08:02 22435094                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/libruby.so.2.3.0
+7f9fc94e4000-7f9fc94e7000 rw-p 002d9000 08:02 22435094                   /home/dev/.rvm/rubies/ruby-2.3.3/lib/libruby.so.2.3.0
+7f9fc94e7000-7f9fc94f8000 rw-p 00000000 00:00 0
+7f9fc94f8000-7f9fc951e000 r-xp 00000000 08:02 21234118                   /lib/x86_64-linux-gnu/ld-2.23.so
+7f9fc95c6000-7f9fc95e8000 r--s 00000000 08:02 21234121                   /lib/x86_64-linux-gnu/libpthread-2.23.so
+7f9fc95e8000-7f9fc96ee000 rw-p 00000000 00:00 0
+7f9fc96f3000-7f9fc9717000 r--s 00000000 08:02 22433508                   /home/dev/.rvm/rubies/ruby-2.3.3/bin/ruby
+7f9fc9717000-7f9fc9718000 ---p 00000000 00:00 0
+7f9fc9718000-7f9fc971d000 rw-p 00000000 00:00 0
+7f9fc971d000-7f9fc971e000 r--p 00025000 08:02 21234118                   /lib/x86_64-linux-gnu/ld-2.23.so
+7f9fc971e000-7f9fc971f000 rw-p 00026000 08:02 21234118                   /lib/x86_64-linux-gnu/ld-2.23.so
+7f9fc971f000-7f9fc9720000 rw-p 00000000 00:00 0
+7fff03a1d000-7fff0421c000 rw-p 00000000 00:00 0                          [stack]
+7fff04235000-7fff04237000 r--p 00000000 00:00 0                          [vvar]
+7fff04237000-7fff04239000 r-xp 00000000 00:00 0                          [vdso]
+ffffffffff600000-ffffffffff601000 r-xp 00000000 00:00 0                  [vsyscall]
+
+
+[NOTE]
+You may have encountered a bug in the Ruby interpreter or extension libraries.
+Bug reports are welcome.
+For details: http://www.ruby-lang.org/bugreport.html
+
+zsh: abort (core dumped)  puma config.ru -e production -p 8080
+dev@earth:~/hashrocket/websocket-shootout/ruby/faye-websocket(tmp*)%  
