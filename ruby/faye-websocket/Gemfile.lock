@@ -1,0 +1,26 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    eventmachine (1.2.1)
+    eventmachine (1.2.1-java)
+    faye-websocket (0.10.5)
+      eventmachine (>= 0.12.0)
+      websocket-driver (>= 0.5.1)
+    puma (3.6.2)
+    puma (3.6.2-java)
+    websocket-driver (0.6.4)
+      websocket-extensions (>= 0.1.0)
+    websocket-driver (0.6.4-java)
+      websocket-extensions (>= 0.1.0)
+    websocket-extensions (0.1.2)
+
+PLATFORMS
+  java
+  ruby
+
+DEPENDENCIES
+  faye-websocket
+  puma
+
+BUNDLED WITH
+   1.13.6
