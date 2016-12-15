@@ -1,17 +1,13 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    daemons (1.2.3)
     eventmachine (1.2.1)
     eventmachine (1.2.1-java)
     faye-websocket (0.10.5)
       eventmachine (>= 0.12.0)
       websocket-driver (>= 0.5.1)
-    rack (1.6.4)
-    thin (1.6.3)
-      daemons (~> 1.0, >= 1.0.9)
-      eventmachine (~> 1.0)
-      rack (~> 1.0)
+    puma (3.6.2)
+    puma (3.6.2-java)
     websocket-driver (0.6.4)
       websocket-extensions (>= 0.1.0)
     websocket-driver (0.6.4-java)
@@ -24,7 +20,7 @@ PLATFORMS
 
 DEPENDENCIES
   faye-websocket
-  thin
+  puma
 
 BUNDLED WITH
-   1.12.5
+   1.13.6
