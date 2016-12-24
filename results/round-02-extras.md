@@ -251,3 +251,32 @@ clients: 37000    95per-rtt: 362ms    min-rtt: 114ms    median-rtt: 172ms    max
 clients: 38000    95per-rtt: 370ms    min-rtt: 118ms    median-rtt: 188ms    max-rtt: 407ms
 clients: 39000    95per-rtt: 455ms    min-rtt: 119ms    median-rtt: 188ms    max-rtt: 627ms
 ```
+
+## Ruby / Plezi / Iodine / MRI
+
+Server Environment
+
+```
+dev@earth:~/hashrocket/websocket-shootout/ruby/plezi-iodine(master*)% ruby -v
+ruby 2.3.3p222 (2016-11-21 revision 56859) [x86_64-linux]
+dev@earth:~/hashrocket/websocket-shootout/ruby/plezi-iodine(master*)% bundle exec iodine -t 8 -p 3000
+```
+
+Benchmark Output
+
+```
+dev@mercury:~/hashrocket/websocket-shootout(master*)% bin/websocket-bench broadcast ws://192.168.50.12:3000/ws -l 192.168.50.5 -l 192.168.50.246 -l 192.168.50.247 --concurrent 4 --sample-size 100 --step-size 1000 --payload-padding 200 -w neptune:4001 -w uranus:4001 -w venus:4001
+clients:  1000    95per-rtt:  36ms    min-rtt:   1ms    median-rtt:  21ms    max-rtt:  46ms
+clients:  2000    95per-rtt:  57ms    min-rtt:   3ms    median-rtt:  39ms    max-rtt:  82ms
+clients:  3000    95per-rtt: 102ms    min-rtt:   3ms    median-rtt:  53ms    max-rtt: 142ms
+clients:  4000    95per-rtt: 138ms    min-rtt:   2ms    median-rtt:  70ms    max-rtt: 165ms
+clients:  5000    95per-rtt: 175ms    min-rtt:   3ms    median-rtt:  96ms    max-rtt: 185ms
+clients:  6000    95per-rtt: 191ms    min-rtt:   5ms    median-rtt: 105ms    max-rtt: 194ms
+clients:  7000    95per-rtt: 231ms    min-rtt:   1ms    median-rtt: 140ms    max-rtt: 243ms
+clients:  8000    95per-rtt: 293ms    min-rtt:   1ms    median-rtt: 161ms    max-rtt: 297ms
+clients:  9000    95per-rtt: 293ms    min-rtt:   1ms    median-rtt: 169ms    max-rtt: 360ms
+clients: 10000    95per-rtt: 368ms    min-rtt:   4ms    median-rtt: 184ms    max-rtt: 501ms
+clients: 11000    95per-rtt: 447ms    min-rtt:   2ms    median-rtt: 183ms    max-rtt: 516ms
+clients: 12000    95per-rtt: 459ms    min-rtt:   2ms    median-rtt: 247ms    max-rtt: 620ms
+2016/12/24 12:23:35 Extra received broadcasts: expected 9100000, got 9100126
+```
