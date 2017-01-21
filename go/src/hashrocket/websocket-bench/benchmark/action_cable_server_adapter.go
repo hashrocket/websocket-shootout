@@ -41,7 +41,7 @@ func (acsa *ActionCableServerAdapter) Startup() error {
 }
 
 func (acsa *ActionCableServerAdapter) SendEcho(payload *Payload) error {
-	data, err := json.Marshal(map[string]interface{}{"action": "echo", "payload": payload})
+	data, err := json.Marshal(map[string]interface{}{"action": "echo", "payload": payloadTojsonPayload(payload)})
 	if err != nil {
 		return err
 	}
@@ -54,7 +54,7 @@ func (acsa *ActionCableServerAdapter) SendEcho(payload *Payload) error {
 }
 
 func (acsa *ActionCableServerAdapter) SendBroadcast(payload *Payload) error {
-	data, err := json.Marshal(map[string]interface{}{"action": "broadcast", "payload": payload})
+	data, err := json.Marshal(map[string]interface{}{"action": "broadcast", "payload": payloadTojsonPayload(payload)})
 	if err != nil {
 		return err
 	}
