@@ -1,0 +1,30 @@
+{"1.1.0",
+[{<<"cowboy">>,
+  {git,"https://github.com/ninenines/cowboy.git",
+       {ref,"dbb636034f20736e16eb9d6c809217c9525b6cbd"}},
+  1},
+ {<<"cowlib">>,
+  {git,"https://github.com/ninenines/cowlib",
+       {ref,"0e7abe0b24593f131add272c275406d8ed231805"}},
+  2},
+ {<<"deliverly">>,
+  {git,"https://github.com/deliverly/deliverly-core.git",
+       {ref,"da7a7f647c74b28ae7b8c8f5b3b270842e419fe0"}},
+  0},
+ {<<"eredis">>,{pkg,<<"eredis">>,<<"1.0.8">>},1},
+ {<<"goldrush">>,{pkg,<<"goldrush">>,<<"0.1.8">>},1},
+ {<<"jsx">>,{pkg,<<"jsx">>,<<"2.8.0">>},1},
+ {<<"lager">>,{pkg,<<"lager">>,<<"3.2.1">>},0},
+ {<<"poolboy">>,{pkg,<<"poolboy">>,<<"1.5.1">>},1},
+ {<<"ranch">>,{pkg,<<"ranch">>,<<"1.2.1">>},1},
+ {<<"ulitos">>,{pkg,<<"ulitos">>,<<"0.3.0">>},1}]}.
+[
+{pkg_hash,[
+ {<<"eredis">>, <<"AB4FDA1C4BA7FBE6C19C26C249DC13DA916D762502C4B4FA2DF401A8D51C5364">>},
+ {<<"goldrush">>, <<"2024BA375CEEA47E27EA70E14D2C483B2D8610101B4E852EF7F89163CDB6E649">>},
+ {<<"jsx">>, <<"749BEC6D205C694AE1786D62CEA6CC45A390437E24835FD16D12D74F07097727">>},
+ {<<"lager">>, <<"EEF4E18B39E4195D37606D9088EA05BF1B745986CF8EC84F01D332456FE88D17">>},
+ {<<"poolboy">>, <<"6B46163901CFD0A1B43D692657ED9D7E599853B3B21B95AE5AE0A777CF9B6CA8">>},
+ {<<"ranch">>, <<"A6FB992C10F2187B46FFD17CE398DDF8A54F691B81768F9EF5F461EA7E28C762">>},
+ {<<"ulitos">>, <<"B22D60F72A0627F5BBCA2A42A8A140467B954EF950E4716E3BD0E42ABF135102">>}]}
+].
