@@ -30,6 +30,7 @@ type Config struct {
 	SampleSize         int
 	LimitPercentile    int
 	LimitRTT           time.Duration
+	TotalSteps         int
 	ClientPools        []ClientPool
 	ResultRecorder     ResultRecorder
 }
@@ -58,8 +59,11 @@ func (b *Benchmark) Run() error {
 		return err
 	}
 
+	stepNum := 0
+
 	for {
 
+		stepNum += 1
 		inProgress := 0
 		for i := 0; i < b.Concurrent; i++ {
 			if err := b.sendToRandomClient(); err != nil {
@@ -88,7 +92,7 @@ func (b *Benchmark) Run() error {
 
 		expectedRxBroadcastCount += len(b.clients) * b.SampleSize
 
-		if b.LimitRTT < rttAgg.Percentile(b.LimitPercentile) {
+		if (b.TotalSteps > 0 && b.TotalSteps == stepNum-1) || (b.TotalSteps == 0 && b.LimitRTT < rttAgg.Percentile(b.LimitPercentile)) {
 			if b.ClientCmd == ClientBroadcastCmd {
 				// Due to the async nature of the broadcasts and the receptions, it is
 				// possible for the broadcastResult to arrive before all the
