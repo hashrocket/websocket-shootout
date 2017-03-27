@@ -12,13 +12,23 @@ if (cluster.isWorker) {
   process.on('message', broadcastMessage);
 }
 
-function broadcastMessage(msg) {
-  var buf = Buffer.from(msg);
-  var opts = {binary: false};
+function each(ws) {
+  for (var i = 0, list = this; i < list.length; i++) {
+    ws._socket.write(list[i]);
+  }
+}
 
-  wss.clients.forEach(function each(ws) {
-    ws.send(buf, opts);
+function broadcastMessage(msg) {
+  var data = Buffer.from(msg);
+  var list = ws.Sender.frame(data, {
+    readOnly: false,
+    mask: false,
+    rsv1: false,
+    opcode: 1,
+    fin: true
   });
+
+  wss.clients.forEach(each, list);
 }
 
 function echo(ws, payload) {
