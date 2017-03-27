@@ -16,9 +16,9 @@ function broadcastMessage(msg) {
   var buf = Buffer.from(msg);
   var opts = {binary: false};
 
-  for (var i = 0; i < wss.clients.length; i++) {
-    wss.clients[i].send(buf, opts);
-  }
+  wss.clients.forEach(function each(ws) {
+    ws.send(buf, opts);
+  });
 }
 
 function echo(ws, payload) {
@@ -36,21 +36,23 @@ function broadcast(ws, payload) {
   ws.send(JSON.stringify({type: 'broadcastResult', payload: payload}));
 }
 
+function onMessage(message) {
+  var msg = JSON.parse(message);
+  switch (msg.type) {
+    case 'echo':
+      echo(this, msg.payload);
+      break;
+    case 'broadcast':
+      broadcast(this, msg.payload);
+      break;
+    default:
+      console.log('unknown message type: %s', message);
+  }
+}
+
 wss.on('connection', function connection(ws) {
   // uws removes the `upgradeReq` object right after emitting the `connection`
   // event. The same is also done here for parity.
   ws.upgradeReq = null;
-  ws.on('message', function incoming(message) {
-    var msg = JSON.parse(message);
-    switch (msg.type) {
-      case 'echo':
-        echo(ws, msg.payload);
-        break;
-      case 'broadcast':
-        broadcast(ws, msg.payload);
-        break;
-      default:
-        console.log('unknown message type: %s', message);
-    }
-  });
+  ws.on('message', onMessage);
 });
