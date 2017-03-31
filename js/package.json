@@ -6,9 +6,9 @@
   "author": "Jack Christensen & Jonathan Jackson",
   "license": "MIT",
   "dependencies": {
-    "bufferutil": "^1.2.1",
+    "bufferutil": "^3.0.0",
     "faye-websocket": "^0.11.0",
     "uws": "^0.10.0",
-    "ws": "^1.1.1"
+    "ws": "^2.2.2"
   }
 }
