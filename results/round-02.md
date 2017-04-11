@@ -895,8 +895,6 @@ clients: 16000    95per-rtt: 497ms    min-rtt:  91ms    median-rtt: 226ms    max
 clients: 17000    95per-rtt: 459ms    min-rtt:  56ms    median-rtt: 254ms    max-rtt: 538ms
 ```
 
-* Note: Server crashes after benchmark runs.
-
 ## Rust - ws
 
 Server Environment
