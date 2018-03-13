@@ -8,7 +8,7 @@
   "dependencies": {
     "bufferutil": "^3.0.0",
     "faye-websocket": "^0.11.0",
-    "uws": "^0.10.0",
+    "uws": "^0.14.5",
     "ws": "^2.2.2"
   }
 }
