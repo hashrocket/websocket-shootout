@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net"
 	"strconv"
-	"sync"
 	"sync/atomic"
 	"time"
 
@@ -31,8 +30,7 @@ type localClient struct {
 	errChan        chan<- error
 	payloadPadding []byte
 
-	rxBroadcastCountLock sync.Mutex
-	rxBroadcastCount     int64
+	rxBroadcastCount int64
 }
 
 type ServerAdapter interface {
