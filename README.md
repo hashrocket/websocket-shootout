@@ -121,6 +121,11 @@ down /sbin/ip addr del 192.168.50.247/24 dev eth0
 
 Results are in the results directory.
 
+## Contributing
+
+This project is complete and is no longer actively maintained. We'll leave pull
+requests demonstrating other implementations open for educational purposes.
+
 ## About
 
 [![Hashrocket logo](https://hashrocket.com/hashrocket_logo.svg)](https://hashrocket.com)
