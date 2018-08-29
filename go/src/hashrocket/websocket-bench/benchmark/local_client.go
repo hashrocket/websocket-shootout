@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net"
 	"strconv"
-	"sync"
+	"sync/atomic"
 	"time"
 
 	"golang.org/x/net/websocket"
@@ -30,8 +30,7 @@ type localClient struct {
 	errChan        chan<- error
 	payloadPadding []byte
 
-	rxBroadcastCountLock sync.Mutex
-	rxBroadcastCount     int
+	rxBroadcastCount int64
 }
 
 type ServerAdapter interface {
@@ -151,10 +150,7 @@ func (c *localClient) SendBroadcast() error {
 }
 
 func (c *localClient) ResetRxBroadcastCount() (int, error) {
-	c.rxBroadcastCountLock.Lock()
-	count := c.rxBroadcastCount
-	c.rxBroadcastCount = 0
-	c.rxBroadcastCountLock.Unlock()
+	count := int(atomic.SwapInt64(&c.rxBroadcastCount, 0))
 	return count, nil
 }
 
@@ -165,7 +161,6 @@ func (c *localClient) rx() {
 			c.errChan <- err
 			return
 		}
-
 		switch msg.Type {
 		case MsgServerEcho, MsgServerBroadcastResult:
 			if msg.Payload != nil {
@@ -176,9 +171,7 @@ func (c *localClient) rx() {
 				return
 			}
 		case MsgServerBroadcast:
-			c.rxBroadcastCountLock.Lock()
-			c.rxBroadcastCount++
-			c.rxBroadcastCountLock.Unlock()
+			atomic.AddInt64(&c.rxBroadcastCount, 1)
 		default:
 			c.errChan <- fmt.Errorf("received unknown message type: %v", msg.Type)
 			return
