@@ -21,7 +21,7 @@ main= keep' $ do
   initNodeDef "localhost" 3000 $ apisample broad 
   return ()
 
-apisample broad= api $               -- api executes the rest of the computation. when some message arrives.
+apisample broad= api $               -- api executes the rest of the computation when some message arrives.
                                      -- It call the computation with an empty message when there is a new
                                      -- connection, so watchbroadcast may be called
                                      -- messages are passed to the computation trough a state monad
@@ -32,7 +32,9 @@ apisample broad= api $               -- api executes the rest of the computation
                                      -- watchBroadcast- is executed.
          processMessage broad msg
          
-    <|>  watchBroadcast broad        -- watch for broadcast messages 
+    <|>  watchBroadcast broad         -- watch for broadcast messages 
+                                      -- Since it is called once at the beginning of each socket connection
+                                      -- it will be as much readEVar watching as the number of connections
 
 
 
